@@ -7,6 +7,7 @@ import net.ptcrys.fpsmatch.core.persistence.DataPersistenceException;
 import net.ptcrys.fpsmatch.core.team.BaseTeam;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
 import com.google.gson.JsonElement;
@@ -18,6 +19,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +35,49 @@ import java.util.stream.Stream;
 public class CapabilityMap<H, T extends FPSMCapability<H>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CapabilityMap.class);
+
+    // NeoForge 1.21.1 运行期规则（与「空 @EventBusSubscriber 类不可注册」是同一条件的动态形态）：
+    //   EventBus.register(Object) 要求被注册对象**自己或它的父类链上至少有一个 @SubscribeEvent 方法**，
+    //   否则抛 IllegalArgumentException:
+    //     class X has no @SubscribeEvent methods, but register was called anyway.
+    //   1.20.1 Forge 不做这个校验，所以上游 initializeAndPublish 里那句无条件的
+    //   NeoForge.EVENT_BUS.register(capability) 一直没暴露问题。
+    // 触发面：FPSMatch 的能力类里只有一部分带**实例**订阅（例如 ShopCapability 的 onJoin/onLeave）；
+    //   其余分两种，都必须跳过实例注册：
+    //     a) 完全没有订阅（SpawnPointCapability 等）—— 注册必抛
+    //        "class X has no @SubscribeEvent methods, but register was called anyway"；
+    //     b) 只有 static 订阅（TeamSwitchRestrictionCapability.onJoin）—— 那个由类级
+    //        @EventBusSubscriber 走静态注入，按实例注册会抛
+    //        "Expected @SubscribeEvent method ... to NOT be static because register() was called
+    //         with an instance type"。
+    //   而这条注册路径在**建图 / 读图**时必然走到（MapTeams.addTeam → ofTeamCapability），
+    //   因此不修的话 cs 类型地图根本建不出来。
+    // 门控语义（即 NeoForge 对「实例注册」的真实前置条件）：
+    //   · 本类声明了**非 static** 的 @SubscribeEvent → 注册（原行为，如 ShopCapability）
+    //   · 父类链上有 @SubscribeEvent              → 也注册，故意让 NeoForge 自己抛 checkSupertypes
+    //                                               （规则 3 的违规场景，不能被这里静默吞掉）
+    //   · 其余（无订阅 / 只有 static 订阅）        → 跳过实例注册
+    private static final Map<Class<?>, Boolean> BUS_REGISTRATION_CACHE = new ConcurrentHashMap<>();
+
+    private static boolean shouldRegisterOnGameBus(final Class<?> capabilityClass) {
+        return BUS_REGISTRATION_CACHE.computeIfAbsent(capabilityClass, type -> {
+            boolean ownInstanceSubscriber = false;
+            for (Class<?> current = type; current != null && current != Object.class; current = current.getSuperclass()) {
+                for (Method method : current.getDeclaredMethods()) {
+                    if (!method.isAnnotationPresent(SubscribeEvent.class)) {
+                        continue;
+                    }
+                    if (current != type) {
+                        return true;
+                    }
+                    if (!Modifier.isStatic(method.getModifiers())) {
+                        ownInstanceSubscriber = true;
+                    }
+                }
+            }
+            return ownInstanceSubscriber;
+        });
+    }
 
     public static <C extends MapCapability> Optional<C> getMapCapability(BaseMap map, final Class<C> capability) {
         return map.getCapabilityMap().get(capability);
@@ -224,8 +270,11 @@ public class CapabilityMap<H, T extends FPSMCapability<H>> {
                 pending.completion.complete(Optional.empty());
                 return false;
             }
-            registrationAttempted = true;
-            NeoForge.EVENT_BUS.register(capability);
+            // 只有真有事件订阅的能力才允许注册到游戏总线；见 shouldRegisterOnGameBus 的注释。
+            if (shouldRegisterOnGameBus(capability.getClass())) {
+                registrationAttempted = true;
+                NeoForge.EVENT_BUS.register(capability);
+            }
         } catch (RuntimeException | Error failure) {
             rollbackFailedAddition(
                     capability,

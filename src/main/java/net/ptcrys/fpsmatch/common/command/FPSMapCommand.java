@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.common.command;
 
+import net.ptcrys.fpsmatch.FPSMatch;
 import net.ptcrys.fpsmatch.core.FPSMCore;
 import net.ptcrys.fpsmatch.core.capability.FPSMCapability;
 import net.ptcrys.fpsmatch.core.capability.FPSMCapabilityManager;
@@ -169,6 +170,18 @@ public class FPSMapCommand {
     }
 
     private static int handleCreateMap(CommandContext<CommandSourceStack> context) {
+        // NeoForge 1.21.1 的服务端控制台只打印一句 "An unexpected error occurred trying to
+        // execute that command"，不带堆栈。建图是必须能定位失败原因的运维动作，所以这里自己
+        // 兜一层把堆栈打到日志里，再把原异常抛回去（不改变对外行为）。
+        try {
+            return handleCreateMapInner(context);
+        } catch (Throwable t) {
+            FPSMatch.LOGGER.error("FPSMatch map create 执行失败，堆栈如下：", t);
+            throw t;
+        }
+    }
+
+    private static int handleCreateMapInner(CommandContext<CommandSourceStack> context) {
         String mapName = StringArgumentType.getString(context, FPSMCommandSuggests.MAP_NAME_ARG);
         String type = StringArgumentType.getString(context, FPSMCommandSuggests.GAME_TYPE_ARG);
         BlockPos pos1 = BlockPosArgument.getBlockPos(context, "from");
@@ -190,6 +203,9 @@ public class FPSMapCommand {
             FPSMCommand.sendFailure(context.getSource(), Component.translatable("commands.fpsm.create.failure.duplicate", mapName));
             return 0;
         }
+        // 上游这里是静默 return 0，控制台/玩家都看不到任何反馈；补一条明确失败信息。
+        FPSMCommand.sendFailure(context.getSource(), Component.literal(
+                "未注册的地图类型 \"" + type + "\"，已注册类型：" + FPSMCore.getInstance().getGameTypes()));
         return 0;
     }
 

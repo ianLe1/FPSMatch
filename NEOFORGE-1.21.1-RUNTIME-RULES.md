@@ -86,6 +86,143 @@ FPSMatch 的实际做法：
 
 ---
 
+## 规则 4：静态注入路径要求 `@SubscribeEvent` 方法必须是 `static`
+
+**现象**（致命）：
+
+```
+java.lang.IllegalArgumentException: Method ...ShopCapability.onJoin(FPSMTeamEvent$JoinEvent)
+annotated with @SubscribeEvent is not static
+```
+
+**触发模式**：`@EventBusSubscriber` 走 `AutomaticEventSubscriber` 的**静态注入**路径，被标注类的每个
+`@SubscribeEvent` 方法都会按 `register(Class)` 处理，而该路径要求方法 `static`。
+
+**修法**：拆类。`static` 订阅搬到同包新建的 `XxxEvents`（`@EventBusSubscriber`）；
+依赖 `this` 的**实例**订阅留在原类，并**删掉类级 `@EventBusSubscriber`**——实例订阅本来就走
+`CapabilityMap` 里逐实例的 `NeoForge.EVENT_BUS.register(capability)` 通道。
+
+FPSMatch 实例：`common/capability/team/ShopCapability.java` → 新建 `ShopCapabilityEvents.java`。
+
+---
+
+## 规则 5：mixin `@At(target = "...")` 是字符串，编译期不校验
+
+**现象**（致命）：
+
+```
+InjectionError: ... failed injection check, (0/1) succeeded.
+Scanned 0 target(s). No refMap loaded.
+```
+
+**触发模式**：`@At(target = "L<owner>;<name><desc>")` 里的 owner/name/descriptor 只在使用时才解析。
+1.21.1 里方法改名（或用 `float` 替换 `int`）后，只改 Java 调用点会**漏掉字符串**。
+
+**修法**：改 target 串，并同步回调参数类型。
+FPSMatch 实例：`setSecondsOnFire(I)V` → `igniteForSeconds(F)V`（`LrtSplashFireStatsMixin` /
+`LrtCloudFireStatsMixin`，回调 `int seconds` → `float seconds`，转调处 `Math.round`）。
+
+**核对要点**：`javap -p -s` 拿 `descriptor:`；**目标方法找不到时要沿 superclass 上溯**——
+`INVOKE` 的 owner 是**调用点的静态类型**，可能是继承该方法子类（`igniteForSeconds` 只声明在
+`Entity` 上，却以 `LivingEntity` 为 owner 调用）。扫描器：`tools/scan_mixin_targets.py`。
+
+---
+
+## 规则 6：客户端类型出现在 `@EventBusSubscriber` 类的**签名**里
+
+**现象**：
+
+```
+RuntimeDistCleaner / DISTXFORM: Attempted to load class net/minecraft/client/Minecraft
+for invalid dist DEDICATED_SERVER
+```
+
+栈里是 `Class.getDeclaredMethods0` ← `AutomaticEventSubscriber.lambda$inject$4:60`。
+
+**触发模式**：`AutomaticEventSubscriber` 会对每个带注解的类调 `Class#getDeclaredMethods()`，
+JVM 必须解析**每个声明方法的参数/返回类型**；`RuntimeDistCleaner` 在 DEDICATED_SERVER 下拒绝
+`net.minecraft.client.*`。**方法体里用客户端类是安全的，只有签名致命**；匿名内部类（`Outer$1`）
+的方法不算外部类的声明方法。
+
+**修法**：把参数去掉，改成方法体内 `Minecraft.getInstance()`。
+实例：`blockoffensive/item/CompositionC4.java` 的 `disableMovementKeys(Minecraft)` → `disableMovementKeys()`。
+
+**扫描器警告**：`tools/scan_dist_cleaner.py` **必须跳过注解含 `Dist.CLIENT` 的类**，否则大量假阳性
+（FPSMatch 报的 11 处全是假阳性，它服务端跑得好好的）。
+
+---
+
+## 规则 7：`@SubscribeEvent` 的参数不能是**抽象事件基类**
+
+**现象**（致命）：
+
+```
+java.lang.IllegalArgumentException: Cannot register listeners for abstract class
+net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.
+Register a listener to one of its subclasses instead!
+```
+
+1.20.1 Forge 允许监听抽象基类，1.21.1 不允许。
+
+**修法**：拆成每个具体子类一个方法。
+实例：`blockoffensive/intro/IntroRuntimeController` 的 `onInteract(PlayerInteractEvent)` →
+拆成 `onLeftClickBlock` / `onRightClickBlock` / `onRightClickItem`。
+
+---
+
+## 规则 8：`EventBus.register(实例)` 要求方法**非 static**，`register(类)` 要求方法 **static**
+
+这是规则 2 与规则 4 的**运行期动态形态**——被注册的不是带注解的类，而是运行期 new 出来的对象。
+
+**现象 A（无订阅也注册）**：
+
+```
+java.lang.IllegalArgumentException: class ...SpawnPointCapability has no @SubscribeEvent methods,
+but register was called anyway.
+The event bus only recognizes listener methods that have the @SubscribeEvent annotation.
+    at net.neoforged.bus.EventBus.register(EventBus.java:135)
+```
+
+**现象 B（static 方法按实例注册）**：
+
+```
+java.lang.IllegalArgumentException: Expected @SubscribeEvent method
+public static void ...TeamSwitchRestrictionCapability.onJoin(...) to NOT be static
+because register() was called with an instance type.
+Either make the method non-static, or call register(TeamSwitchRestrictionCapability.class).
+    at net.neoforged.bus.EventBus.register(EventBus.java:124)
+```
+
+**为什么危险**：这类注册点通常在**低频路径**上（建图 / 读图 / 首次交互），启动日志完全看不出来。
+FPSMatch 的 `core/capability/CapabilityMap.java` 原本无条件
+`NeoForge.EVENT_BUS.register(capability)`，而该路径在
+`MapTeams.addTeam → BaseTeam.<init> → ofTeamCapability` 必然走到 ⇒
+**任何地图都创建不出来**，但服务端启动一直是 `Done (...)`。
+
+**门控语义（= NeoForge 对「实例注册」的真实前置条件）**：
+
+| 本类声明的 `@SubscribeEvent` | 处理 |
+|---|---|
+| 有**非 static** 的 | 注册实例（正常路径） |
+| 只有 static 的 | **跳过**（static 订阅由 `@EventBusSubscriber` 走类级静态注入） |
+| 一个都没有 | **跳过**（注册必抛） |
+| 父类链上有 | **仍然注册**，故意让 `checkSupertypes` 抛（规则 3 的违规不能被静默吞掉） |
+
+`javap -p -c` 实证 `bus-8.0.5.jar`：`register(Object)` 取 `obj.getClass()`，对候选方法校验
+`Modifier.isStatic` + `isAnnotationPresent(SubscribeEvent.class)`，然后调 `checkSupertypes`
+（两帧 = 递归）。`unregister(Object)` 是安全的（`ConcurrentHashMap.remove` 返回 null 即 return），
+不需要门控。
+
+FPSMatch 实例：`core/capability/CapabilityMap.java` 新增 `shouldRegisterOnGameBus(Class)`
+（`ConcurrentHashMap` 按 class 缓存 + `getDeclaredMethods` 判定）。
+
+**排查手法（可复用）**：这类「控制台异常无堆栈」的场景，NeoForge 只打一句
+`An unexpected error occurred trying to execute that command`
+（来源 `DedicatedServer.handleConsoleInputs`，`logs/debug.log` 里也没有）。要给命令执行体加
+try/catch 自己 `LOGGER.error(msg, t)` 再原样抛回，才能拿到堆栈。
+
+---
+
 ## 排除的噪声（**不要**去修）
 
 - `RuntimeDistCleaner/DISTXFORM: Attempted to load class net/minecraft/client/... for invalid dist DEDICATED_SERVER`
