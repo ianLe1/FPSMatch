@@ -7,9 +7,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import com.tacz.guns.api.item.GunTabType;
 
@@ -19,14 +19,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @SuppressWarnings("all")
 public class FPSMSoundRegister {
 
-    public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, FPSMatch.MODID);
+    public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, FPSMatch.MODID);
 
-    public static final RegistryObject<SoundEvent> VOICE_SMOKE = SOUNDS.register("voice_smoke", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.tryBuild(FPSMatch.MODID, "voice_smoke")));
-    public static final RegistryObject<SoundEvent> VOICE_FLASH = SOUNDS.register("voice_flash", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.tryBuild(FPSMatch.MODID, "voice_flash")));
-    public static final RegistryObject<SoundEvent> VOICE_GRENADE = SOUNDS.register("voice_grenade", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.tryBuild(FPSMatch.MODID, "voice_grenade")));
-    public static final RegistryObject<SoundEvent> FLASH = SOUNDS.register("flash", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.tryBuild(FPSMatch.MODID, "flash")));
-    public static final RegistryObject<SoundEvent> BOOM = SOUNDS.register("boom", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.tryBuild(FPSMatch.MODID, "boom")));
-    public static final RegistryObject<SoundEvent> MVP_DEFAULT = SOUNDS.register("mvp.default", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.tryBuild(FPSMatch.MODID, "mvp.default")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> VOICE_SMOKE = SOUNDS.register("voice_smoke", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.tryBuild(FPSMatch.MODID, "voice_smoke")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> VOICE_FLASH = SOUNDS.register("voice_flash", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.tryBuild(FPSMatch.MODID, "voice_flash")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> VOICE_GRENADE = SOUNDS.register("voice_grenade", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.tryBuild(FPSMatch.MODID, "voice_grenade")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> FLASH = SOUNDS.register("flash", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.tryBuild(FPSMatch.MODID, "flash")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> BOOM = SOUNDS.register("boom", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.tryBuild(FPSMatch.MODID, "boom")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> MVP_DEFAULT = SOUNDS.register("mvp.default", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.tryBuild(FPSMatch.MODID, "mvp.default")));
 
     private static final Map<GunTabTypeEnum, SoundEvent> GUN_PICKUP_REGISTRY = new ConcurrentHashMap<>();
     private static final Map<GunTabTypeEnum, SoundEvent> GUN_DROP_REGISTRY = new ConcurrentHashMap<>();

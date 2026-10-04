@@ -1,7 +1,7 @@
 package net.ptcrys.fpsmatch.common.packet;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayDeque;
 import java.util.Map;
@@ -35,6 +35,6 @@ final class SoundRequestPolicy {
     }
 
     private static boolean isGameplaySound(ResourceLocation location) {
-        return (location.getNamespace().equals("fpsmatch") || location.getNamespace().equals("blockoffensive")) && ForgeRegistries.SOUND_EVENTS.containsKey(location);
+        return (location.getNamespace().equals("fpsmatch") || location.getNamespace().equals("blockoffensive")) && BuiltInRegistries.SOUND_EVENT.containsKey(location);
     }
 }

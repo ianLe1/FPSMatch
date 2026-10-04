@@ -3,7 +3,7 @@ package net.ptcrys.fpsmatch.common.packet.mapselect;
 import net.ptcrys.fpsmatch.common.packet.ClientPacketExecutor;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ public record MapImportSourcesS2CPacket(
                 buf.readCollection(ArrayList::new, MapImportSourceInfo::decode));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
+    public void handle(Supplier<PayloadContext> contextSupplier) {
         ClientPacketExecutor.execute(contextSupplier, this);
     }
 }

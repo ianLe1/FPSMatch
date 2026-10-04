@@ -7,7 +7,7 @@ import net.ptcrys.fpsmatch.core.persistence.DataPersistenceException;
 import net.ptcrys.fpsmatch.core.team.BaseTeam;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -225,7 +225,7 @@ public class CapabilityMap<H, T extends FPSMCapability<H>> {
                 return false;
             }
             registrationAttempted = true;
-            MinecraftForge.EVENT_BUS.register(capability);
+            NeoForge.EVENT_BUS.register(capability);
         } catch (RuntimeException | Error failure) {
             rollbackFailedAddition(
                     capability,
@@ -262,7 +262,7 @@ public class CapabilityMap<H, T extends FPSMCapability<H>> {
     private void discardInitializedAddition(T capability) {
         Throwable cleanupFailure = null;
         try {
-            MinecraftForge.EVENT_BUS.unregister(capability);
+            NeoForge.EVENT_BUS.unregister(capability);
         } catch (RuntimeException | Error failure) {
             cleanupFailure = failure;
         }
@@ -331,7 +331,7 @@ public class CapabilityMap<H, T extends FPSMCapability<H>> {
                                         Throwable failure) {
         if (registrationAttempted) {
             try {
-                MinecraftForge.EVENT_BUS.unregister(capability);
+                NeoForge.EVENT_BUS.unregister(capability);
             } catch (RuntimeException | Error rollbackFailure) {
                 failure.addSuppressed(rollbackFailure);
             }
@@ -396,7 +396,7 @@ public class CapabilityMap<H, T extends FPSMCapability<H>> {
         try {
             for (T capability : capabilities.values()) {
                 try {
-                    MinecraftForge.EVENT_BUS.unregister(capability);
+                    NeoForge.EVENT_BUS.unregister(capability);
                 } catch (RuntimeException | Error ignored) {
                     // 从未注册过或已反注册的对象直接忽略，safeUnregister 语义
                 }
@@ -414,7 +414,7 @@ public class CapabilityMap<H, T extends FPSMCapability<H>> {
             cleanupFailure = failure;
         }
         try {
-            MinecraftForge.EVENT_BUS.unregister(capability);
+            NeoForge.EVENT_BUS.unregister(capability);
         } catch (RuntimeException | Error failure) {
             if (cleanupFailure == null) {
                 cleanupFailure = failure;
@@ -708,7 +708,7 @@ public class CapabilityMap<H, T extends FPSMCapability<H>> {
                 DATA_CODEC.fieldOf("capabilities").forGetter(Wrapper::data)).apply(instance, Wrapper::new));
 
         public JsonElement encode() {
-            return CODEC.encodeStart(JsonOps.INSTANCE, this).getOrThrow(false, e -> { throw new DataPersistenceException("Error while encode capability map to json."); });
+            return CODEC.encodeStart(JsonOps.INSTANCE, this).getOrThrow(e -> { throw new DataPersistenceException("Error while encode capability map to json."); });
         }
 
         public static class Builder<H> {
@@ -726,7 +726,7 @@ public class CapabilityMap<H, T extends FPSMCapability<H>> {
             }
 
             public JsonElement encode() {
-                return DATA_CODEC.encodeStart(JsonOps.INSTANCE, data).getOrThrow(false, e -> { throw new DataPersistenceException("Error while encode capability map to json."); });
+                return DATA_CODEC.encodeStart(JsonOps.INSTANCE, data).getOrThrow(e -> { throw new DataPersistenceException("Error while encode capability map to json."); });
             }
 
             public Wrapper build() {

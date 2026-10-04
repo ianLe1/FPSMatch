@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.common.item;
 
+import net.minecraft.world.item.Item;
 import net.ptcrys.fpsmatch.FPSMatch;
 import net.ptcrys.fpsmatch.common.item.tool.CreatorToolItem;
 import net.ptcrys.fpsmatch.common.item.tool.ToolInteractionAction;
@@ -10,6 +11,7 @@ import net.ptcrys.fpsmatch.common.packet.OpenMapCreatorToolScreenS2CPacket;
 import net.ptcrys.fpsmatch.common.packet.RemoveDebugDataByPrefixS2CPacket;
 import net.ptcrys.fpsmatch.core.FPSMCore;
 import net.ptcrys.fpsmatch.core.data.AreaData;
+import net.ptcrys.fpsmatch.util.ItemNbt;
 import net.ptcrys.fpsmatch.util.PreviewColorUtil;
 
 import net.minecraft.ChatFormatting;
@@ -111,31 +113,31 @@ public class MapCreatorTool extends CreatorToolItem implements WorldToolItem {
     }
 
     public static void setSelectedType(ItemStack stack, String selectedType) {
-        stack.getOrCreateTag().putString(TYPE_TAG, selectedType == null ? "" : selectedType);
+        ItemNbt.getOrCreateTag(stack).putString(TYPE_TAG, selectedType == null ? "" : selectedType);
     }
 
     public static String getSelectedType(ItemStack stack) {
-        return stack.getOrCreateTag().getString(TYPE_TAG);
+        return ItemNbt.getOrCreateTag(stack).getString(TYPE_TAG);
     }
 
     public static void setDraftMapName(ItemStack stack, String draftMapName) {
-        stack.getOrCreateTag().putString(DRAFT_MAP_NAME_TAG, draftMapName == null ? "" : draftMapName);
+        ItemNbt.getOrCreateTag(stack).putString(DRAFT_MAP_NAME_TAG, draftMapName == null ? "" : draftMapName);
     }
 
     public static String getDraftMapName(ItemStack stack) {
-        return stack.getOrCreateTag().getString(DRAFT_MAP_NAME_TAG);
+        return ItemNbt.getOrCreateTag(stack).getString(DRAFT_MAP_NAME_TAG);
     }
 
     public static void setSelectedMap(ItemStack stack, String selectedMap) {
-        stack.getOrCreateTag().putString(SELECTED_MAP_TAG, selectedMap == null ? "" : selectedMap);
+        ItemNbt.getOrCreateTag(stack).putString(SELECTED_MAP_TAG, selectedMap == null ? "" : selectedMap);
     }
 
     public static String getSelectedMap(ItemStack stack) {
-        return stack.getOrCreateTag().getString(SELECTED_MAP_TAG);
+        return ItemNbt.getOrCreateTag(stack).getString(SELECTED_MAP_TAG);
     }
 
     public static void setBlockPos(ItemStack stack, String tag, @Nullable BlockPos pos) {
-        CompoundTag compoundTag = stack.getOrCreateTag();
+        CompoundTag compoundTag = ItemNbt.getOrCreateTag(stack);
         if (pos == null) {
             compoundTag.remove(tag);
             return;
@@ -144,7 +146,7 @@ public class MapCreatorTool extends CreatorToolItem implements WorldToolItem {
     }
 
     public static @Nullable BlockPos getBlockPos(ItemStack stack, String tag) {
-        CompoundTag compoundTag = stack.getOrCreateTag();
+        CompoundTag compoundTag = ItemNbt.getOrCreateTag(stack);
         if (!compoundTag.contains(tag, Tag.TAG_LONG)) {
             return null;
         }
@@ -156,8 +158,8 @@ public class MapCreatorTool extends CreatorToolItem implements WorldToolItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
-        super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
+    public void appendHoverText(ItemStack pStack, Item.TooltipContext pContext, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
+        super.appendHoverText(pStack, pContext, pTooltipComponents, pIsAdvanced);
         pTooltipComponents.add(Component.translatable("tooltip.fpsm.separator").withStyle(ChatFormatting.GOLD));
         pTooltipComponents.add(Component.translatable("tooltip.fpsm.map_creator.selected.type")
                 .append(": ")

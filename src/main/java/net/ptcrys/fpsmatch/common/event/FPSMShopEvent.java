@@ -4,7 +4,7 @@ import net.ptcrys.fpsmatch.core.shop.FPSMShop;
 import net.ptcrys.fpsmatch.core.shop.INamedType;
 import net.ptcrys.fpsmatch.core.shop.slot.ShopSlot;
 
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

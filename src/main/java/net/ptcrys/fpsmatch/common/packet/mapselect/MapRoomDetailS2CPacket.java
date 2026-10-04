@@ -3,7 +3,7 @@ package net.ptcrys.fpsmatch.common.packet.mapselect;
 import net.ptcrys.fpsmatch.common.packet.ClientPacketExecutor;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -25,7 +25,7 @@ public record MapRoomDetailS2CPacket(MapRoomDetail detail, boolean passive) {
         return new MapRoomDetailS2CPacket(MapRoomDetail.decode(buf), buf.readBoolean());
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ClientPacketExecutor.execute(ctx, this);
     }
 }

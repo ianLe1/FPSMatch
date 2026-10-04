@@ -94,7 +94,7 @@ public class RequestBuilder<T> {
     public RequestBuilder<T> setJsonBody(T body) {
         try {
             JsonElement jsonElement = codec.encodeStart(JsonOps.INSTANCE, body)
-                    .getOrThrow(false, e -> {
+                    .getOrThrow(e -> {
                         throw new RuntimeException("编码失败: " + e);
                     });
             String jsonString = jsonElement.toString();
@@ -213,7 +213,7 @@ public class RequestBuilder<T> {
             try {
                 JsonElement jsonElement = JsonParser.parseString(interceptedResponse.body());
                 T data = codec.decode(JsonOps.INSTANCE, jsonElement)
-                        .getOrThrow(false, e -> {
+                        .getOrThrow(e -> {
                             throw new RuntimeException(e);
                         }).getFirst();
                 apiResponse.setData(data);

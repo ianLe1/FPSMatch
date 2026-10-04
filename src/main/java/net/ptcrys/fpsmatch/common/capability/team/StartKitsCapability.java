@@ -22,7 +22,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -136,11 +136,11 @@ public class StartKitsCapability extends TeamCapability implements FPSMCapabilit
         teamKits.forEach(itemStack -> {
             ItemStack copy = itemStack.copy();
             if (copy.getItem() instanceof ArmorItem armorItem) {
-                MinecraftForge.EVENT_BUS.post(new PlayerObtainItemEvent(player, copy));
+                NeoForge.EVENT_BUS.post(new PlayerObtainItemEvent(player, copy));
                 player.setItemSlot(armorItem.getEquipmentSlot(), copy);
             } else {
                 FPSMUtil.fixGunItem(copy);
-                MinecraftForge.EVENT_BUS.post(new PlayerObtainItemEvent(player, copy));
+                NeoForge.EVENT_BUS.post(new PlayerObtainItemEvent(player, copy));
                 player.getInventory().add(copy);
             }
         });

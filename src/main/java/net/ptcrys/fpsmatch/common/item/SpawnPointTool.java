@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.common.item;
 
+import net.minecraft.world.item.Item;
 import net.ptcrys.fpsmatch.FPSMatch;
 import net.ptcrys.fpsmatch.common.capability.team.SpawnPointCapability;
 import net.ptcrys.fpsmatch.common.item.tool.CreatorToolItem;
@@ -14,6 +15,7 @@ import net.ptcrys.fpsmatch.core.FPSMCore;
 import net.ptcrys.fpsmatch.core.data.SpawnPointData;
 import net.ptcrys.fpsmatch.core.map.BaseMap;
 import net.ptcrys.fpsmatch.core.team.ServerTeam;
+import net.ptcrys.fpsmatch.util.ItemNbt;
 import net.ptcrys.fpsmatch.util.PreviewColorUtil;
 import net.ptcrys.fpsmatch.util.SpawnPointSafety;
 
@@ -221,32 +223,32 @@ public class SpawnPointTool extends CreatorToolItem implements WorldToolItem {
     }
 
     public static void setSelectedType(ItemStack stack, String selectedType) {
-        stack.getOrCreateTag().putString(TYPE_TAG, selectedType == null ? "" : selectedType);
+        ItemNbt.getOrCreateTag(stack).putString(TYPE_TAG, selectedType == null ? "" : selectedType);
     }
 
     public static String getSelectedType(ItemStack stack) {
-        return stack.getOrCreateTag().getString(TYPE_TAG);
+        return ItemNbt.getOrCreateTag(stack).getString(TYPE_TAG);
     }
 
     public static void setSelectedMap(ItemStack stack, String selectedMap) {
-        stack.getOrCreateTag().putString(MAP_TAG, selectedMap == null ? "" : selectedMap);
+        ItemNbt.getOrCreateTag(stack).putString(MAP_TAG, selectedMap == null ? "" : selectedMap);
     }
 
     public static String getSelectedMap(ItemStack stack) {
-        return stack.getOrCreateTag().getString(MAP_TAG);
+        return ItemNbt.getOrCreateTag(stack).getString(MAP_TAG);
     }
 
     public static void setSelectedTeam(ItemStack stack, String selectedTeam) {
-        stack.getOrCreateTag().putString(TEAM_TAG, selectedTeam == null ? "" : selectedTeam);
+        ItemNbt.getOrCreateTag(stack).putString(TEAM_TAG, selectedTeam == null ? "" : selectedTeam);
     }
 
     public static String getSelectedTeam(ItemStack stack) {
-        return stack.getOrCreateTag().getString(TEAM_TAG);
+        return ItemNbt.getOrCreateTag(stack).getString(TEAM_TAG);
     }
 
     @Override
-    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
-        super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
+    public void appendHoverText(ItemStack pStack, Item.TooltipContext pContext, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
+        super.appendHoverText(pStack, pContext, pTooltipComponents, pIsAdvanced);
         pTooltipComponents.add(Component.translatable("tooltip.fpsm.separator").withStyle(ChatFormatting.GOLD));
         pTooltipComponents.add(Component.translatable("tooltip.fpsm.spawn_point_tool.selected.type")
                 .append(": ")

@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.common.client;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.ptcrys.fpsmatch.FPSMatch;
 import net.ptcrys.fpsmatch.common.client.data.RenderableArea;
 import net.ptcrys.fpsmatch.common.client.data.RenderablePoint;
@@ -21,21 +22,22 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import java.util.Collection;
 import java.util.List;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
 public class FPSMClientEvents {
 
     private static Button mapSelectionButton;
@@ -152,17 +154,17 @@ public class FPSMClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
+    public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (event.phase == TickEvent.Phase.END) FPSMClientPacketHandlers.flushPendingTeamPlayerStats();
-        if (event.phase == TickEvent.Phase.END && SpectateState.isRestricted() && (player == null || !player.isSpectator())) {
+        FPSMClientPacketHandlers.flushPendingTeamPlayerStats();
+        if (SpectateState.isRestricted() && (player == null || !player.isSpectator())) {
             // Also cover sessions entered directly by a team switch, without a killcam.
             SpectateState.set(SpectateMode.FREE);
             SpectatorCameraController.reset();
             net.ptcrys.fpsmatch.common.client.camera.CameraDirector.restoreBase();
         }
-        if (player != null && player.hasEffect(FPSMEffectRegister.FLASH_BLINDNESS.get())) {
+        if (player != null && player.hasEffect(FPSMEffectRegister.FLASH_BLINDNESS)) {
             mc.getSoundManager().stop();
         }
     }

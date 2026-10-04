@@ -153,7 +153,7 @@ public class Setting<T> {
      * @throws RuntimeException 如果编码过程中发生错误。
      */
     public JsonElement toJson() {
-        return this.codec().encodeStart(JsonOps.INSTANCE, this.value).getOrThrow(false, e -> {
+        return this.codec().encodeStart(JsonOps.INSTANCE, this.value).getOrThrow(e -> {
             throw new RuntimeException(e);
         });
     }
@@ -170,7 +170,7 @@ public class Setting<T> {
      * @throws RuntimeException 如果解码过程中发生错误。
      */
     public void fromJson(JsonElement json) {
-        this.value = this.codec().decode(JsonOps.INSTANCE, json).getOrThrow(false, e -> {
+        this.value = this.codec().decode(JsonOps.INSTANCE, json).getOrThrow(e -> {
             throw new RuntimeException(e);
         }).getFirst();
     }

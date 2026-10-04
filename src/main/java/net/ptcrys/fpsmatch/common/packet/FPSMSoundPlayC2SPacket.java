@@ -5,7 +5,7 @@ import net.ptcrys.fpsmatch.core.FPSMCore;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -28,7 +28,7 @@ public class FPSMSoundPlayC2SPacket {
         return new FPSMSoundPlayC2SPacket(buf.readResourceLocation(), buf.readBoolean());
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
             if (player == null) return;

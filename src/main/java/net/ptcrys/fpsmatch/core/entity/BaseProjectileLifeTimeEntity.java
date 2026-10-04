@@ -51,10 +51,10 @@ public abstract class BaseProjectileLifeTimeEntity extends BaseProjectileEntity 
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(TIMEOUT_TICKS, -1);
-        entityData.define(TIME_LEFT, -1);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(TIMEOUT_TICKS, -1);
+        builder.define(TIME_LEFT, -1);
     }
 
     @Override

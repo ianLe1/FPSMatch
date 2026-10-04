@@ -4,15 +4,18 @@ import net.ptcrys.fpsmatch.common.camera.CameraEndReason;
 import net.ptcrys.fpsmatch.common.client.event.FPSMClientResetEvent;
 
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderFrameEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, modid = "fpsmatch")
+@EventBusSubscriber(value = Dist.CLIENT, modid = "fpsmatch")
 public final class CameraEvents {
 
     private static long renderFrame;
@@ -21,21 +24,19 @@ public final class CameraEvents {
     private CameraEvents() {}
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void validate(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START) CameraDirector.validate();
+    public static void validate(ClientTickEvent.Pre event) {
+        CameraDirector.validate();
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void tick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && !Minecraft.getInstance().isPaused()) CameraDirector.tick();
+    public static void tick(ClientTickEvent.Post event) {
+        if (!Minecraft.getInstance().isPaused()) CameraDirector.tick();
     }
 
     @SubscribeEvent
-    public static void frame(TickEvent.RenderTickEvent event) {
-        if (event.phase == TickEvent.Phase.START) {
-            ++renderFrame;
-            CameraDirector.prepareFrame(event.renderTickTime);
-        }
+    public static void frame(RenderFrameEvent.Pre event) {
+        ++renderFrame;
+        CameraDirector.prepareFrame(event.getPartialTick().getGameTimeDeltaPartialTick(false));
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -79,21 +80,21 @@ public final class CameraEvents {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void overlay(RenderGuiOverlayEvent.Pre event) {
+    public static void overlay(RenderGuiLayerEvent.Pre event) {
         if (CameraDirector.policy().hideHud()) event.setCanceled(true);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void gui(RenderGuiEvent.Pre event) {
         if (!CameraDirector.policy().hideHud()) return;
-        renderOverlay(event.getGuiGraphics(), event.getPartialTick());
+        renderOverlay(event.getGuiGraphics(), event.getPartialTick().getGameTimeDeltaPartialTick(false));
         event.setCanceled(true);
     }
 
     public static void renderOverlay(net.minecraft.client.gui.GuiGraphics graphics, float partialTick) {
         if (overlayFrame == renderFrame) return;
         overlayFrame = renderFrame;
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new CameraOverlayEvent(graphics, partialTick));
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new CameraOverlayEvent(graphics, partialTick));
         renderFade(graphics);
     }
 

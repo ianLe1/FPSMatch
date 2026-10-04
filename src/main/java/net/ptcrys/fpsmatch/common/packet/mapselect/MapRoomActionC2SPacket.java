@@ -8,7 +8,7 @@ import net.ptcrys.fpsmatch.common.mapselect.MapSelectionAccessSync;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -56,7 +56,7 @@ public record MapRoomActionC2SPacket(Action action, String gameType, String mapN
         return new MapRoomActionC2SPacket(buf.readEnum(Action.class), buf.readUtf(ID_MAX_LENGTH), buf.readUtf(ID_MAX_LENGTH), buf.readUUID(), buf.readUtf(DATA_MAX_LENGTH));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
             if (player == null) {

@@ -6,7 +6,7 @@ import net.ptcrys.fpsmatch.core.capability.team.TeamCapability;
 import net.ptcrys.fpsmatch.core.team.ServerTeam;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import io.netty.buffer.Unpooled;
 
@@ -58,7 +58,7 @@ public record TeamCapabilitiesS2CPacket(
         }
     }
 
-    public void handle(Supplier<NetworkEvent.Context> supplier) {
+    public void handle(Supplier<PayloadContext> supplier) {
         ClientPacketExecutor.execute(supplier, this);
     }
 }

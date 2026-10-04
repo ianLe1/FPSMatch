@@ -8,18 +8,20 @@ import net.ptcrys.fpsmatch.core.team.BaseTeam;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.ICancellableEvent;
 
 import dev.latvian.mods.kubejs.event.EventExit;
 import dev.latvian.mods.kubejs.event.EventGroup;
-import dev.latvian.mods.kubejs.event.EventJS;
+import dev.latvian.mods.kubejs.event.KubeEvent;
+import dev.latvian.mods.rhino.Context;
 
 public class FPSMatchKubeJSEvents {
 
     public static final EventGroup GROUP = EventGroup.of("FPSMatchEvents");
 
     // ---- Base JS event ----
-    public abstract static class FPSMatchEventJS<E extends Event> extends EventJS {
+    public abstract static class FPSMatchEventJS<E extends Event> implements KubeEvent {
 
         protected final E event;
 
@@ -32,11 +34,12 @@ public class FPSMatchKubeJSEvents {
         }
 
         @Override
-        public Object cancel() throws EventExit {
-            if (event.isCancelable()) {
-                event.setCanceled(true);
+        public Object cancel(Context cx) throws EventExit {
+            // 1.21.1: NeoForge 用 ICancellableEvent 表达可取消性
+            if (event instanceof ICancellableEvent cancellable) {
+                cancellable.setCanceled(true);
             }
-            return super.cancel();
+            return KubeEvent.super.cancel(cx);
         }
     }
 

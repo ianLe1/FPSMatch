@@ -2,7 +2,7 @@ package net.ptcrys.fpsmatch.common.packet;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -22,7 +22,7 @@ public class FPSMSoundPlayS2CPacket {
         return new FPSMSoundPlayS2CPacket(buf.readResourceLocation());
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ClientPacketExecutor.execute(ctx, this);
     }
 

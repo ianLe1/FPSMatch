@@ -12,11 +12,14 @@ import net.ptcrys.fpsmatch.core.shop.INamedType;
 import net.ptcrys.fpsmatch.core.shop.functional.ListenerModule;
 import net.ptcrys.fpsmatch.core.shop.slot.ShopSlot;
 import net.ptcrys.fpsmatch.util.FPSMUtil;
+import net.ptcrys.fpsmatch.util.ItemNbt;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -168,7 +171,7 @@ public final class ShopEditorService {
                 List<ShopSlot> slots = shop.getDefaultShopSlotListByType(type);
                 buf.writeVarInt(slots.size());
                 for (ShopSlot slot : slots) {
-                    writeTag(buf, slot.process().save(new CompoundTag()));
+                    writeTag(buf, ItemNbt.save(registries(buf), slot.process()));
                     buf.writeInt(slot.getDefaultCost());
                     buf.writeInt(slot.getMaxBuyCount());
                     buf.writeInt(slot.getGroupId());
@@ -208,8 +211,20 @@ public final class ShopEditorService {
         }
     }
 
+    /**
+     * 取序列化用的注册表查询器。包内所有 {@code write/read} 走到的缓冲在线上都是
+     * {@link RegistryFriendlyByteBuf}（{@code ReflectivePayload} 保证），哈希路径则由
+     * {@link #hash} 显式构造同类型缓冲。
+     */
+    static HolderLookup.Provider registries(FriendlyByteBuf buf) {
+        if (buf instanceof RegistryFriendlyByteBuf registryFriendly) {
+            return registryFriendly.registryAccess();
+        }
+        return FPSMUtil.registryAccess();
+    }
+
     static String hash(Consumer<FriendlyByteBuf> writer) {
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        FriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), FPSMUtil.registryAccess());
         try {
             writer.accept(buf);
             byte[] bytes = new byte[buf.readableBytes()];

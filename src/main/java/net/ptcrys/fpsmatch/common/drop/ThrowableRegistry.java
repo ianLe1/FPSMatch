@@ -2,7 +2,7 @@ package net.ptcrys.fpsmatch.common.drop;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,7 +52,7 @@ public class ThrowableRegistry {
      * 将物品注册到指定的投掷物子类型
      */
     public static void registerItemToSubType(ResourceLocation itemId, String subTypeId) {
-        Item item = ForgeRegistries.ITEMS.getValue(itemId);
+        Item item = BuiltInRegistries.ITEM.get(itemId);
         if (item != null) {
             registerItemToSubType(item, subTypeId);
         }

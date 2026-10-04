@@ -1,45 +1,13 @@
 package net.ptcrys.fpsmatch.compat.spectate.net;
 
-import net.ptcrys.fpsmatch.FPSMatch;
-
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
- * Dedicated channel for spectator sync packets (TACZ + LRTactical).
+ * 观众同步包（TACZ + LRTactical）。
+ * <p>
+ * 上游用独立的第二条 {@code SimpleChannel}；NeoForge 1.21 取消了 {@code SimpleChannel}，
+ * 因此这里不再自建通道，4 个包统一并入 {@code FPSMatch} 的主 {@code NetworkPacketRegister}，
+ * 由 {@code FPSMatch#onRegisterPackets} 在 {@code RegisterPayloadHandlersEvent} 里注册。
  */
-@Mod.EventBusSubscriber(modid = FPSMatch.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class SpectatorSyncNetwork {
 
-    private static final String PROTOCOL_VERSION = "1";
-    private static final AtomicBoolean REGISTERED = new AtomicBoolean(false);
-
-    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            ResourceLocation.tryBuild(FPSMatch.MODID, "spectator_sync"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals);
-
     private SpectatorSyncNetwork() {}
-
-    @SubscribeEvent
-    public static void onCommonSetup(FMLCommonSetupEvent event) {
-        event.enqueueWork(SpectatorSyncNetwork::registerPackets);
-    }
-
-    public static void registerPackets() {
-        if (!REGISTERED.compareAndSet(false, true)) {
-            return;
-        }
-        AtomicInteger id = new AtomicInteger(0);
-        SpectatorInspectPackets.register(CHANNEL, id);
-        SpectatorLrtAttackPackets.register(CHANNEL, id);
-    }
 }

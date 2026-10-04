@@ -11,7 +11,7 @@ public class ItemKey {
 
     public ItemKey(ItemStack stack) {
         this.item = stack.getItem();
-        this.tag = stack.getTag() != null ? stack.getTag().copy() : null;
+        this.tag = ItemNbt.getTag(stack) != null ? ItemNbt.getTag(stack).copy() : null;
     }
 
     @Override
@@ -20,9 +20,9 @@ public class ItemKey {
         if (o == null || getClass() != o.getClass()) return false;
         ItemKey itemKey = (ItemKey) o;
 
-        return ItemStack.isSameItemSameTags(
-                new ItemStack(item, 1, tag),
-                new ItemStack(itemKey.item, 1, itemKey.tag));
+        return ItemStack.isSameItemSameComponents(
+                ItemNbt.of(item, 1, tag),
+                ItemNbt.of(itemKey.item, 1, itemKey.tag));
     }
 
     @Override

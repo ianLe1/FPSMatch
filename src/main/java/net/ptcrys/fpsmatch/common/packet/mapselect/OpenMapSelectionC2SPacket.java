@@ -7,7 +7,7 @@ import net.ptcrys.fpsmatch.config.FPSMConfig;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -19,7 +19,7 @@ public record OpenMapSelectionC2SPacket() {
         return new OpenMapSelectionC2SPacket();
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
             if (player == null) {

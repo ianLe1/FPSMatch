@@ -1,7 +1,7 @@
 package net.ptcrys.fpsmatch.common.client.spec;
 
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 public final class SpectatorSwitchInputEvent extends Event {
 

@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.common.item;
 
+import net.minecraft.world.item.Item;
 import net.ptcrys.fpsmatch.FPSMatch;
 import net.ptcrys.fpsmatch.common.item.tool.CreatorToolItem;
 import net.ptcrys.fpsmatch.common.item.tool.handler.ClickActionContext;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
+import net.ptcrys.fpsmatch.util.ItemNbt;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -33,7 +35,7 @@ public class MatchConfigTool extends CreatorToolItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("tooltip.fpsm.match_config_tool"));
         String selectedType = getSelectedType(stack);
         String selectedMap = getSelectedMap(stack);
@@ -43,18 +45,18 @@ public class MatchConfigTool extends CreatorToolItem {
     }
 
     public static void setSelected(ItemStack stack, String selectedType, String selectedMap) {
-        CompoundTag tag = stack.getOrCreateTag();
+        CompoundTag tag = ItemNbt.getOrCreateTag(stack);
         tag.putString(TYPE_TAG, selectedType == null ? "" : selectedType);
         tag.putString(MAP_TAG, selectedMap == null ? "" : selectedMap);
     }
 
     public static String getSelectedType(ItemStack stack) {
-        CompoundTag tag = stack.getOrCreateTag();
+        CompoundTag tag = ItemNbt.getOrCreateTag(stack);
         return tag.contains(TYPE_TAG) ? tag.getString(TYPE_TAG) : "";
     }
 
     public static String getSelectedMap(ItemStack stack) {
-        CompoundTag tag = stack.getOrCreateTag();
+        CompoundTag tag = ItemNbt.getOrCreateTag(stack);
         return tag.contains(MAP_TAG) ? tag.getString(MAP_TAG) : "";
     }
 }

@@ -7,7 +7,7 @@ import net.ptcrys.fpsmatch.common.mapselect.MapRoomQueryService;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -24,7 +24,7 @@ public record RequestMapImportSourcesC2SPacket(String gameType, String mapName) 
         return new RequestMapImportSourcesC2SPacket(buf.readUtf(MAX_LENGTH), buf.readUtf(MAX_LENGTH));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
+    public void handle(Supplier<PayloadContext> contextSupplier) {
         contextSupplier.get().enqueueWork(() -> {
             ServerPlayer player = contextSupplier.get().getSender();
             if (player == null) return;

@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.common.client;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.ptcrys.fpsmatch.FPSMatch;
 import net.ptcrys.fpsmatch.common.client.data.FPSMClientGlobalData;
 import net.ptcrys.fpsmatch.common.client.event.FPSMClientResetEvent;
@@ -12,22 +13,23 @@ import net.ptcrys.fpsmatch.util.RenderUtil;
 import net.minecraft.Optionull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.scores.PlayerTeam;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.util.*;
 
 @OnlyIn(Dist.CLIENT)
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT, modid = FPSMatch.MODID)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT, modid = FPSMatch.MODID)
 public class FPSMClient {
 
     private static final FPSMClientGlobalData DATA = new FPSMClientGlobalData();
@@ -53,9 +55,11 @@ public class FPSMClient {
     }
 
     @SubscribeEvent
-    public static void onRegisterGuiOverlaysEvent(RegisterGuiOverlaysEvent event) {
-        event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "flash_bomb_hud", FlashBombHud.INSTANCE);
-        event.registerBelowAll("hud_manager", FPSMGameHudManager.INSTANCE);
+    public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
+        event.registerBelow(VanillaGuiLayers.CHAT,
+                ResourceLocation.fromNamespaceAndPath(FPSMatch.MODID, "flash_bomb_hud"), FlashBombHud.INSTANCE);
+        event.registerBelowAll(ResourceLocation.fromNamespaceAndPath(FPSMatch.MODID, "hud_manager"),
+                FPSMGameHudManager.INSTANCE);
     }
 
     @SubscribeEvent
@@ -77,6 +81,6 @@ public class FPSMClient {
     public static void reset() {
         DATA.reset();
         RenderUtil.invalidatePlayerInfoCache();
-        MinecraftForge.EVENT_BUS.post(new FPSMClientResetEvent());
+        NeoForge.EVENT_BUS.post(new FPSMClientResetEvent());
     }
 }

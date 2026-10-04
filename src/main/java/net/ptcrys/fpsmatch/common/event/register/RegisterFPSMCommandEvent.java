@@ -5,7 +5,7 @@ import net.ptcrys.fpsmatch.common.command.FPSMHelpManager;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 

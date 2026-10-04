@@ -1,7 +1,7 @@
 package net.ptcrys.fpsmatch.common.packet;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -34,7 +34,7 @@ public class FPSMatchGameTypeS2CPacket {
         return new FPSMatchGameTypeS2CPacket(mapName, gameType, teamGlow, enemyGlow);
     }
 
-    public void handle(Supplier<NetworkEvent.Context> supplier) {
+    public void handle(Supplier<PayloadContext> supplier) {
         ClientPacketExecutor.execute(supplier, this);
     }
 

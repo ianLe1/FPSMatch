@@ -3,7 +3,7 @@ package net.ptcrys.fpsmatch.common.event.register;
 import net.ptcrys.fpsmatch.core.persistence.FPSMDataManager;
 import net.ptcrys.fpsmatch.core.persistence.SaveHolder;
 
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 /**
  * 注册 FPSMatch 可保存数据类型的事件。

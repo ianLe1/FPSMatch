@@ -4,7 +4,7 @@ import net.ptcrys.fpsmatch.common.shop.editor.ShopEditorService;
 import net.ptcrys.fpsmatch.common.shop.editor.ShopEditorSnapshot;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -19,7 +19,7 @@ public record OpenShopEditorC2SPacket(long requestId, ShopEditorSnapshot.Target 
         return new OpenShopEditorC2SPacket(buf.readLong(), ShopEditorSnapshot.Target.read(buf));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ctx.get().enqueueWork(() -> ShopEditorService.load(ctx.get().getSender(), requestId, target));
         ctx.get().setPacketHandled(true);
     }

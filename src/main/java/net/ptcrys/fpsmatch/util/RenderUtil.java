@@ -174,21 +174,23 @@ public class RenderUtil {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
 
         Matrix4f matrix = poseStack.last().pose();
-        BufferBuilder buffer = Tesselator.getInstance().getBuilder();
 
-        // 构建顶点
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.vertex(matrix, x, y, 0).uv(minU, minV).endVertex();
-        buffer.vertex(matrix, x, y + height, 0).uv(minU, maxV).endVertex();
-        buffer.vertex(matrix, x + width, y + height, 0).uv(maxU, maxV).endVertex();
-        buffer.vertex(matrix, x + width, y, 0).uv(maxU, minV).endVertex();
+        // 1.21.1: Tesselator 直接产出 BufferBuilder（getBuilder() 已删），
+        // 顶点累积完毕后 buildOrThrow() 得到 MeshData 再交给 BufferUploader。
+        BufferBuilder buffer = Tesselator.getInstance()
+                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        buffer.addVertex(matrix, x, y, 0).setUv(minU, minV);
+        buffer.addVertex(matrix, x, y + height, 0).setUv(minU, maxV);
+        buffer.addVertex(matrix, x + width, y + height, 0).setUv(maxU, maxV);
+        buffer.addVertex(matrix, x + width, y, 0).setUv(maxU, minV);
 
-        BufferUploader.drawWithShader(buffer.end());
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 
     public static ResourceLocation fetchSkin(UUID id, String name) {
         return Minecraft.getInstance().getSkinManager()
-                .getInsecureSkinLocation(new GameProfile(id, name));
+                .getInsecureSkin(new GameProfile(id, name))
+                .texture();
     }
 
     /**

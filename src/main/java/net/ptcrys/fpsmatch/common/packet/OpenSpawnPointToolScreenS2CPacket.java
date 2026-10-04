@@ -3,7 +3,7 @@ package net.ptcrys.fpsmatch.common.packet;
 import net.ptcrys.fpsmatch.core.data.SpawnPointData;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public record OpenSpawnPointToolScreenS2CPacket(
                 buf.readJsonWithCodec(SpawnPointData.CODEC.listOf()));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ClientPacketExecutor.execute(ctx, this);
     }
 

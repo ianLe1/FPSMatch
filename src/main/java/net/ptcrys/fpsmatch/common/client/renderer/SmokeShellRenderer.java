@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.common.client.renderer;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.ptcrys.fpsmatch.common.entity.throwable.SmokeShellEntity;
 import net.ptcrys.fpsmatch.common.item.FPSMItemRegister;
 
@@ -15,15 +16,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.common.Mod;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+// 1.21.1 NeoForge 的 AutomaticEventSubscriber 要求被 @EventBusSubscriber 标注的类
+// 自身至少有一个 @SubscribeEvent 方法，否则抛 "class ... has no @SubscribeEvent methods,
+// but register was called anyway" 并让 mod 加载失败。本类没有任何订阅方法，注解是历史残留。
 public class SmokeShellRenderer implements EntityRendererProvider<SmokeShellEntity> {
 
     @Override

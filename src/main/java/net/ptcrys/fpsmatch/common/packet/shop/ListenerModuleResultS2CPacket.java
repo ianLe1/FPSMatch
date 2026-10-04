@@ -6,7 +6,7 @@ import net.ptcrys.fpsmatch.common.shop.editor.ShopEditorResult;
 import net.ptcrys.fpsmatch.common.shop.editor.ShopEditorSnapshot;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -29,7 +29,7 @@ public record ListenerModuleResultS2CPacket(long requestId, ShopEditorSnapshot.T
                 buf.readEnum(ShopEditorResult.class), buf.readBoolean() ? ListenerModuleSnapshot.read(buf) : null, buf.readBoolean() ? ShopEditorSnapshot.read(buf) : null);
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ClientPacketExecutor.execute(ctx, this);
     }
 }

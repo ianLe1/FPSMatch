@@ -1,37 +1,25 @@
 package net.ptcrys.fpsmatch.compat.spectate.net;
 
+import net.ptcrys.fpsmatch.FPSMatch;
 import net.ptcrys.fpsmatch.common.packet.ClientPacketExecutor;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.simple.SimpleChannel;
 
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /**
  * Packets for TACZ inspect sync while spectating.
+ * <p>
+ * 已迁移到 NeoForge 1.21 载荷协议：包类改为上游统一的
+ * {@code static decode/encode + 实例 handle(Supplier<PayloadContext>)} 协议，
+ * 由 {@code NetworkPacketRegister} 反射注册。
  */
 public final class SpectatorInspectPackets {
 
     private SpectatorInspectPackets() {}
-
-    public static void register(SimpleChannel channel, AtomicInteger id) {
-        channel.messageBuilder(C2SStartInspectPacket.class, id.getAndIncrement(), NetworkDirection.PLAY_TO_SERVER)
-                .decoder(C2SStartInspectPacket::decode)
-                .encoder(C2SStartInspectPacket::encode)
-                .consumerMainThread((pkt, ctx) -> handleStartInspectPacket(channel, pkt, ctx))
-                .add();
-
-        channel.messageBuilder(S2CWatchedPlayerInspectPacket.class, id.getAndIncrement(), NetworkDirection.PLAY_TO_CLIENT)
-                .decoder(S2CWatchedPlayerInspectPacket::decode)
-                .encoder(S2CWatchedPlayerInspectPacket::encode)
-                .consumerMainThread(S2CWatchedPlayerInspectPacket::handle)
-                .add();
-    }
 
     public record C2SStartInspectPacket() {
 
@@ -40,6 +28,18 @@ public final class SpectatorInspectPackets {
         }
 
         public static void encode(C2SStartInspectPacket p, FriendlyByteBuf b) {}
+
+        public void handle(Supplier<PayloadContext> ctx) {
+            ctx.get().enqueueWork(() -> {
+                ServerPlayer sp = ctx.get().getSender();
+                if (sp == null) return;
+                S2CWatchedPlayerInspectPacket pkt = new S2CWatchedPlayerInspectPacket(sp.getUUID());
+                for (ServerPlayer pl : sp.server.getPlayerList().getPlayers()) {
+                    FPSMatch.sendToPlayer(pl, pkt);
+                }
+            });
+            ctx.get().setPacketHandled(true);
+        }
     }
 
     public record S2CWatchedPlayerInspectPacket(UUID id) {
@@ -56,20 +56,8 @@ public final class SpectatorInspectPackets {
             return this.id;
         }
 
-        public static void handle(S2CWatchedPlayerInspectPacket p, Supplier<NetworkEvent.Context> ctx) {
-            ClientPacketExecutor.execute(ctx, p);
+        public void handle(Supplier<PayloadContext> ctx) {
+            ClientPacketExecutor.execute(ctx, this);
         }
-    }
-
-    private static void handleStartInspectPacket(SimpleChannel channel, C2SStartInspectPacket m, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            ServerPlayer sp = ctx.get().getSender();
-            if (sp == null) return;
-            S2CWatchedPlayerInspectPacket pkt = new S2CWatchedPlayerInspectPacket(sp.getUUID());
-            for (ServerPlayer pl : sp.server.getPlayerList().getPlayers()) {
-                channel.sendTo(pkt, pl.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
-            }
-        });
-        ctx.get().setPacketHandled(true);
     }
 }

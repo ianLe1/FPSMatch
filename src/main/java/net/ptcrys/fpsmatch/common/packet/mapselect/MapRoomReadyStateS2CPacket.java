@@ -3,7 +3,7 @@ package net.ptcrys.fpsmatch.common.packet.mapselect;
 import net.ptcrys.fpsmatch.common.packet.ClientPacketExecutor;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,18 +28,18 @@ public record MapRoomReadyStateS2CPacket(
         buf.writeUtf(packet.gameType(), ID_MAX_LENGTH);
         buf.writeUtf(packet.mapName(), ID_MAX_LENGTH);
         buf.writeInt(packet.countdownSeconds());
-        buf.writeCollection(packet.readyPlayers(), FriendlyByteBuf::writeUUID);
+        buf.writeCollection(packet.readyPlayers(), (buffer, uuid) -> buffer.writeUUID(uuid));
     }
 
     public static MapRoomReadyStateS2CPacket decode(FriendlyByteBuf buf) {
         String gameType = buf.readUtf(ID_MAX_LENGTH);
         String mapName = buf.readUtf(ID_MAX_LENGTH);
         int countdownSeconds = buf.readInt();
-        Set<UUID> readyPlayers = buf.readCollection(HashSet::new, FriendlyByteBuf::readUUID);
+        Set<UUID> readyPlayers = buf.readCollection(HashSet::new, buffer -> buffer.readUUID());
         return new MapRoomReadyStateS2CPacket(gameType, mapName, countdownSeconds, readyPlayers);
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ClientPacketExecutor.execute(ctx, this);
     }
 }

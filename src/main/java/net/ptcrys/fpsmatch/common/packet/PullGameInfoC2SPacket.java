@@ -5,7 +5,7 @@ import net.ptcrys.fpsmatch.core.map.BaseMap;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -18,7 +18,7 @@ public record PullGameInfoC2SPacket() {
         return new PullGameInfoC2SPacket();
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
             if (player != null) {

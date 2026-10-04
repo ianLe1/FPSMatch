@@ -7,7 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -36,11 +36,11 @@ public class FlashBombAddonS2CPacket {
                 buf.readInt());
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ctx.get().enqueueWork(() -> {
             LocalPlayer player = Minecraft.getInstance().player;
-            if (player != null && player.hasEffect(FPSMEffectRegister.FLASH_BLINDNESS.get())) {
-                MobEffectInstance effectInstance = player.getEffect(FPSMEffectRegister.FLASH_BLINDNESS.get());
+            if (player != null && player.hasEffect(FPSMEffectRegister.FLASH_BLINDNESS)) {
+                MobEffectInstance effectInstance = player.getEffect(FPSMEffectRegister.FLASH_BLINDNESS);
                 if (effectInstance != null && effectInstance.getEffect() instanceof FlashBlindnessMobEffect flashBlindnessMobEffect) {
                     flashBlindnessMobEffect.setFullBlindnessTime(fullBlindnessTime);
                     flashBlindnessMobEffect.setTotalBlindnessTime(totalBlindnessTime);

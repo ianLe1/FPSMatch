@@ -8,8 +8,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.tacz.guns.entity.EntityKineticBullet;
-import me.muksc.tacztweaks.BulletRayTracer;
-import me.muksc.tacztweaks.data.BulletInteractionManager;
+import me.muksc.tacztweaks.feature.raytracer.BulletHandler;
+import me.muksc.tacztweaks.feature.raytracer.BulletRayTracer;
+import me.muksc.tacztweaks.feature.datapack.legacy.manager.BulletInteractionManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -20,9 +21,9 @@ public abstract class TweakAmmoMixin {
                    method = "handle",
                    at = @At(
                             value = "INVOKE",
-                            target = "Lme/muksc/tacztweaks/data/BulletInteractionManager;handleBlockInteraction(Lcom/tacz/guns/entity/EntityKineticBullet;Lnet/minecraft/world/phys/BlockHitResult;Lnet/minecraft/world/level/block/state/BlockState;)Lme/muksc/tacztweaks/data/BulletInteractionManager$InteractionResult;"))
-    private BulletInteractionManager.InteractionResult fpsmatch$wrapBlockInteraction(BulletInteractionManager instance, EntityKineticBullet entity, BlockHitResult hitResult, BlockState state, Operation<BulletInteractionManager.InteractionResult> original) {
-        BulletInteractionManager.InteractionResult interactionResult = original.call(instance, entity, hitResult, state);
+                            target = "Lme/muksc/tacztweaks/feature/datapack/legacy/manager/BulletInteractionManager;handleBlockInteraction(Lcom/tacz/guns/entity/EntityKineticBullet;Lnet/minecraft/world/phys/BlockHitResult;Lnet/minecraft/world/level/block/state/BlockState;)Lme/muksc/tacztweaks/feature/raytracer/BulletHandler$InteractionResult;"))
+    private BulletHandler.InteractionResult fpsmatch$wrapBlockInteraction(BulletInteractionManager instance, EntityKineticBullet entity, BlockHitResult hitResult, BlockState state, Operation<BulletHandler.InteractionResult> original) {
+        BulletHandler.InteractionResult interactionResult = original.call(instance, entity, hitResult, state);
         if (entity instanceof IPassThroughEntity throughEntity && interactionResult.getPierce()) {
             throughEntity.fpsmatch$setThroughWall(true);
         }

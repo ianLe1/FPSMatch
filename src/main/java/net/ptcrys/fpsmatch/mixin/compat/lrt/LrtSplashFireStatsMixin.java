@@ -11,16 +11,17 @@ import me.xjqsh.lrtactical.entity.EffectCloudGrenadeEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
+// 1.21.1: Entity#setSecondsOnFire(int) 已改名为 igniteForSeconds(float)
 @Mixin(value = EffectCloudGrenadeEntity.class, remap = false)
 public abstract class LrtSplashFireStatsMixin {
 
     @WrapOperation(method = "applyAllEffects",
                    at = @At(value = "INVOKE",
-                            target = "Lnet/minecraft/world/entity/LivingEntity;setSecondsOnFire(I)V",
+                            target = "Lnet/minecraft/world/entity/LivingEntity;igniteForSeconds(F)V",
                             remap = true))
-    private void fpsmatch$rememberThrower(LivingEntity target, int seconds, Operation<Void> original) {
+    private void fpsmatch$rememberThrower(LivingEntity target, float seconds, Operation<Void> original) {
         original.call(target, seconds);
         Entity grenade = (Entity) (Object) this;
-        LrtUtilityAttribution.ignited(target, grenade, LrtUtilityAttribution.owner(grenade), seconds);
+        LrtUtilityAttribution.ignited(target, grenade, LrtUtilityAttribution.owner(grenade), Math.round(seconds));
     }
 }

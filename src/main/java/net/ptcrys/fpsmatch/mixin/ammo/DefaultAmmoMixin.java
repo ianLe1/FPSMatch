@@ -9,7 +9,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -53,7 +53,7 @@ public class DefaultAmmoMixin {
         BlockState state = level.getBlockState(blockPos);
         if (state.isAir()) return false;
 
-        ResourceLocation blockId = ForgeRegistries.BLOCKS.getKey(state.getBlock());
+        ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
         if (blockId != null && AmmoConfig.PASS_THROUGH_BLOCKS.get().contains(blockId.toString())) {
             return true;
         }

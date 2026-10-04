@@ -9,13 +9,13 @@ import com.mojang.serialization.JsonOps;
 public class FPSMCodec {
 
     public static <T> JsonElement encodeToJson(Codec<T> codec, T data) {
-        return codec.encodeStart(JsonOps.INSTANCE, data).getOrThrow(false, e -> {
+        return codec.encodeStart(JsonOps.INSTANCE, data).getOrThrow(e -> {
             throw new DataPersistenceException(e);
         });
     }
 
     public static <T> T decodeFromJson(Codec<T> codec, JsonElement json) {
-        return codec.decode(JsonOps.INSTANCE, json).getOrThrow(false, e -> {
+        return codec.decode(JsonOps.INSTANCE, json).getOrThrow(e -> {
             throw new DataPersistenceException(e);
         }).getFirst();
     }

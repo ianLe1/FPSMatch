@@ -4,7 +4,7 @@ import net.ptcrys.fpsmatch.common.shop.editor.ShopEditorService;
 import net.ptcrys.fpsmatch.common.shop.editor.ShopEditorSnapshot;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -25,7 +25,7 @@ public record SaveShopSlotConfigurationC2SPacket(long requestId, ShopEditorSnaps
                 buf.readUtf(128), buf.readInt(), ShopEditorSnapshot.Slot.read(buf));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ctx.get().enqueueWork(() -> ShopEditorService.saveSlot(ctx.get().getSender(), requestId, target, revision, type, index, draft));
         ctx.get().setPacketHandled(true);
     }

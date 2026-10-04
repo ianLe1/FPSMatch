@@ -7,7 +7,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,7 +34,7 @@ public abstract class NameTagRenderMixin {
         PlayerNameTagRenderEvent.Pre event = new PlayerNameTagRenderEvent.Pre(
                 player, poseStack, bufferSource, packedLight, 0.0f);
 
-        if (MinecraftForge.EVENT_BUS.post(event)) {
+        if (NeoForge.EVENT_BUS.post(event).isCanceled()) {
             ci.cancel();
         }
     }
@@ -51,6 +51,6 @@ public abstract class NameTagRenderMixin {
         PlayerNameTagRenderEvent.Post event = new PlayerNameTagRenderEvent.Post(
                 player, poseStack, bufferSource, packedLight, 0.0f);
 
-        MinecraftForge.EVENT_BUS.post(event);
+        NeoForge.EVENT_BUS.post(event);
     }
 }

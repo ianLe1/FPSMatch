@@ -17,6 +17,6 @@ public abstract class MixinLocalPlayerInspectSync {
 
     @Inject(method = "inspect", at = @At("HEAD"))
     private void fpsmatch$syncInspect(CallbackInfo ci) {
-        SpectatorSyncNetwork.CHANNEL.sendToServer(new C2SStartInspectPacket());
+        net.ptcrys.fpsmatch.FPSMatch.sendToServer(new C2SStartInspectPacket());
     }
 }

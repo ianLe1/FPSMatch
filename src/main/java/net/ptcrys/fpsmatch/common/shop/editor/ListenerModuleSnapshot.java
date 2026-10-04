@@ -3,9 +3,11 @@ package net.ptcrys.fpsmatch.common.shop.editor;
 import net.ptcrys.fpsmatch.common.shop.functional.ChangeShopItemModule;
 import net.ptcrys.fpsmatch.core.shop.functional.ListenerModule;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
+import net.ptcrys.fpsmatch.util.ItemNbt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,20 +59,22 @@ public record ListenerModuleSnapshot(String revision, List<Module> modules) {
         }
 
         public void write(FriendlyByteBuf buf) {
+            HolderLookup.Provider registries = ShopEditorService.registries(buf);
             buf.writeUtf(name, 256);
-            buf.writeNbt(defaultItem.save(new CompoundTag()));
+            buf.writeNbt(ItemNbt.save(registries, defaultItem));
             buf.writeInt(defaultCost);
-            buf.writeNbt(changedItem.save(new CompoundTag()));
+            buf.writeNbt(ItemNbt.save(registries, changedItem));
             buf.writeInt(changedCost);
         }
 
         public static Definition read(FriendlyByteBuf buf) {
+            HolderLookup.Provider registries = ShopEditorService.registries(buf);
             String name = buf.readUtf(256);
             CompoundTag original = buf.readNbt();
             int originalCost = buf.readInt();
             CompoundTag changed = buf.readNbt();
-            return new Definition(name, original == null ? ItemStack.EMPTY : ItemStack.of(original), originalCost,
-                    changed == null ? ItemStack.EMPTY : ItemStack.of(changed), buf.readInt());
+            return new Definition(name, ItemNbt.parse(registries, original), originalCost,
+                    ItemNbt.parse(registries, changed), buf.readInt());
         }
     }
 

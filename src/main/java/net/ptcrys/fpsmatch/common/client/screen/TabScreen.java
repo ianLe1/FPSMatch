@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.common.client.screen;
 
+import net.minecraft.world.scores.DisplaySlot;
 import net.ptcrys.fpsmatch.common.client.tab.TabRenderer;
 import net.ptcrys.fpsmatch.util.RenderUtil;
 
@@ -30,7 +31,7 @@ public class TabScreen extends Screen {
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         Scoreboard scoreboard = RenderUtil.getScoreboard();
-        tab.render(guiGraphics, this.width, RenderUtil.getPlayerInfos(), scoreboard, scoreboard.getDisplayObjective(0));
+        tab.render(guiGraphics, this.width, RenderUtil.getPlayerInfos(), scoreboard, scoreboard.getDisplayObjective(DisplaySlot.LIST));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.common.event;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.ptcrys.fpsmatch.FPSMatch;
 import net.ptcrys.fpsmatch.compat.PassThroughFlagResolver;
 import net.ptcrys.fpsmatch.compat.gun.GunCompatManager;
@@ -15,13 +16,13 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +39,7 @@ import java.util.UUID;
 /**
  * In-match damage/death proxy pipeline.
  */
-@Mod.EventBusSubscriber(modid = FPSMatch.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = FPSMatch.MODID, bus = EventBusSubscriber.Bus.GAME)
 public class FPSMDeathPipelineEventHook {
 
     private static final long RECENT_GUN_HIT_MATCH_WINDOW_TICKS = 5L;
@@ -60,7 +61,7 @@ public class FPSMDeathPipelineEventHook {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onPlayerHurt(LivingHurtEvent event) {
+    public static void onPlayerHurt(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer hurt)) return;
 
         Optional<BaseMap> opt = FPSMCore.getInstance().getMapByPlayer(hurt);
@@ -75,7 +76,7 @@ public class FPSMDeathPipelineEventHook {
 
         DamageSource attributedSource = net.ptcrys.fpsmatch.compat.LrtUtilityAttribution.resolve(hurt, event.getSource());
         FPSMapEvent.PlayerEvent.HurtEvent hurtEvent = new FPSMapEvent.PlayerEvent.HurtEvent(map, hurt, attributedSource, event.getAmount());
-        if (MinecraftForge.EVENT_BUS.post(hurtEvent)) {
+        if (NeoForge.EVENT_BUS.post(hurtEvent).isCanceled()) {
             event.setCanceled(true);
             return;
         }
@@ -139,7 +140,7 @@ public class FPSMDeathPipelineEventHook {
 
                 DamageSource attributedSource = net.ptcrys.fpsmatch.compat.LrtUtilityAttribution.resolve(player, event.getSource());
                 FPSMapEvent.PlayerEvent.DeathEvent deathEvent = new FPSMapEvent.PlayerEvent.DeathEvent(map, player, attributedSource);
-                MinecraftForge.EVENT_BUS.post(deathEvent);
+                NeoForge.EVENT_BUS.post(deathEvent);
                 if (deathEvent.isCanceled()) {
                     return;
                 }
@@ -210,10 +211,7 @@ public class FPSMDeathPipelineEventHook {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
+    public static void onServerTick(ServerTickEvent.Post event) {
 
         long now = FPSMCore.getInstance().getServer().overworld().getGameTime();
 
@@ -271,7 +269,7 @@ public class FPSMDeathPipelineEventHook {
         if (killer != null) {
             boolean enemyKill = !mapTeams.isSameTeam(player, killer);
             if (enemyKill) {
-                if (!MinecraftForge.EVENT_BUS.post(new FPSMapEvent.PlayerEvent.KillRecordEvent(map, killer, player, context.getDamageSource()))) {
+                if (!NeoForge.EVENT_BUS.post(new FPSMapEvent.PlayerEvent.KillRecordEvent(map, killer, player, context.getDamageSource())).isCanceled()) {
                     mapTeams.getPlayerData(killer).ifPresent(PlayerData::addKill);
                     if (context.isHeadShot()) {
                         mapTeams.getPlayerData(killer).ifPresent(PlayerData::addHeadshotKill);
@@ -286,7 +284,7 @@ public class FPSMDeathPipelineEventHook {
             });
 
             FPSMapEvent.PlayerEvent.KillEvent killEvent = new FPSMapEvent.PlayerEvent.KillEvent(map, killer, player, context.getDamageSource(), context.isHeadShot());
-            MinecraftForge.EVENT_BUS.post(killEvent);
+            NeoForge.EVENT_BUS.post(killEvent);
         }
     }
 

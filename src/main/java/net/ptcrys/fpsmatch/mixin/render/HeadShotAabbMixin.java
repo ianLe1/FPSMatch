@@ -2,7 +2,7 @@ package net.ptcrys.fpsmatch.mixin.render;
 
 import net.ptcrys.fpsmatch.config.FPSMConfig;
 
-import net.minecraftforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
 
 import com.tacz.guns.client.event.RenderHeadShotAABB;
 import org.spongepowered.asm.mixin.Mixin;

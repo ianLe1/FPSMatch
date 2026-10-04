@@ -7,7 +7,7 @@ import net.ptcrys.fpsmatch.common.packet.ClientPacketExecutor;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -28,7 +28,7 @@ public record SpectatorTargetS2CPacket(SpectateMode mode, int entityId, Vec3 anc
         return new SpectatorTargetS2CPacket(b.readEnum(SpectateMode.class), b.readVarInt(), new Vec3(b.readDouble(), b.readDouble(), b.readDouble()), b.readFloat(), b.readFloat(), b.readFloat());
     }
 
-    public void handle(Supplier<NetworkEvent.Context> c) {
+    public void handle(Supplier<PayloadContext> c) {
         ClientPacketExecutor.execute(c, this);
     }
 

@@ -1,8 +1,10 @@
 package net.ptcrys.fpsmatch.common.shop.editor;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
+import net.ptcrys.fpsmatch.util.ItemNbt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +65,7 @@ public record ShopEditorSnapshot(Target target, String revision, List<Category> 
         }
 
         public void write(FriendlyByteBuf buf) {
-            buf.writeNbt(item.save(new CompoundTag()));
+            buf.writeNbt(ItemNbt.save(ShopEditorService.registries(buf), item));
             buf.writeInt(price);
             buf.writeInt(ammo);
             buf.writeInt(group);
@@ -72,8 +74,9 @@ public record ShopEditorSnapshot(Target target, String revision, List<Category> 
         }
 
         public static Slot read(FriendlyByteBuf buf) {
+            HolderLookup.Provider registries = ShopEditorService.registries(buf);
             CompoundTag tag = buf.readNbt();
-            return new Slot(tag == null ? ItemStack.EMPTY : ItemStack.of(tag), buf.readInt(), buf.readInt(),
+            return new Slot(ItemNbt.parse(registries, tag), buf.readInt(), buf.readInt(),
                     buf.readInt(), buf.readInt(), buf.readCollection(FriendlyByteBuf.limitValue(ArrayList::new, MAX_MODULES), in -> in.readUtf(256)));
         }
     }

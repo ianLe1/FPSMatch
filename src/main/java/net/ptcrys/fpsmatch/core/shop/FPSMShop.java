@@ -17,8 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.common.NeoForge;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -207,7 +206,7 @@ public class FPSMShop<T extends Enum<T> & INamedType> {
                 ShopData<T> shopData = this.getPlayerShopData(uuid);
                 for (T type : enumConstants) {
                     List<ShopSlot> slots = shopData.getShopSlotsByType(type);
-                    slots.forEach((shopSlot -> FPSMatch.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new ShopDataSlotS2CPacket(name, type, shopSlot))));
+                    slots.forEach((shopSlot -> FPSMatch.sendToPlayer(player, new ShopDataSlotS2CPacket(name, type, shopSlot))));
                 }
             });
         }
@@ -229,7 +228,7 @@ public class FPSMShop<T extends Enum<T> & INamedType> {
                         .filter(recipientTeam.get()::equals).isEmpty())
                     continue;
                 ShopData<T> shopData = this.getPlayerShopData(uuid);
-                FPSMatch.INSTANCE.send(PacketDistributor.PLAYER.with(() -> recipient), new ShopMoneyS2CPacket(uuid, shopData.getMoney()));
+                FPSMatch.sendToPlayer(recipient, new ShopMoneyS2CPacket(uuid, shopData.getMoney()));
             }
         }
     }
@@ -239,8 +238,7 @@ public class FPSMShop<T extends Enum<T> & INamedType> {
         for (ServerPlayer viewer : viewers) {
             for (UUID uuid : playersData.keySet()) {
                 ShopData<T> shopData = this.getPlayerShopData(uuid);
-                FPSMatch.INSTANCE.send(PacketDistributor.PLAYER.with(() -> viewer),
-                        new ShopMoneyS2CPacket(uuid, shopData.getMoney()));
+                FPSMatch.sendToPlayer(viewer, new ShopMoneyS2CPacket(uuid, shopData.getMoney()));
             }
         }
     }
@@ -254,7 +252,7 @@ public class FPSMShop<T extends Enum<T> & INamedType> {
         if (playersData.containsKey(uuid)) {
             FPSMCore.getInstance().getPlayerByUUID(uuid).ifPresent(player -> {
                 ShopData<T> shopData = this.getPlayerShopData(uuid);
-                FPSMatch.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new ShopMoneyS2CPacket(uuid, shopData.getMoney()));
+                FPSMatch.sendToPlayer(player, new ShopMoneyS2CPacket(uuid, shopData.getMoney()));
             });
         }
     }
@@ -274,7 +272,7 @@ public class FPSMShop<T extends Enum<T> & INamedType> {
         ShopMoneyS2CPacket packet = new ShopMoneyS2CPacket(player.getUUID(), shopData.getMoney());
         FPSMCore.getInstance().getMapByPlayer(player)
                 .flatMap(map -> map.getMapTeams().getTeamByPlayer(player))
-                .ifPresentOrElse(team -> team.getOnline().forEach(teammate -> FPSMatch.INSTANCE.send(PacketDistributor.PLAYER.with(() -> teammate), packet)),
+                .ifPresentOrElse(team -> team.getOnline().forEach(teammate -> FPSMatch.sendToPlayer(teammate, packet)),
                         () -> this.syncShopMoneyData(player));
     }
 
@@ -297,7 +295,7 @@ public class FPSMShop<T extends Enum<T> & INamedType> {
         List<T> enumConstants = getEnums();
         for (T type : enumConstants) {
             List<ShopSlot> slots = shopData.getShopSlotsByType(type);
-            slots.forEach((shopSlot -> FPSMatch.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new ShopDataSlotS2CPacket(name, type, shopSlot))));
+            slots.forEach((shopSlot -> FPSMatch.sendToPlayer(player, new ShopDataSlotS2CPacket(name, type, shopSlot))));
         }
     }
 
@@ -309,7 +307,7 @@ public class FPSMShop<T extends Enum<T> & INamedType> {
      * @param slot   商店槽位
      */
     public void syncShopData(ServerPlayer player, String type, ShopSlot slot) {
-        FPSMatch.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new ShopDataSlotS2CPacket(name, valueOf(type), slot));
+        FPSMatch.sendToPlayer(player, new ShopDataSlotS2CPacket(name, valueOf(type), slot));
     }
 
     /**
@@ -321,7 +319,7 @@ public class FPSMShop<T extends Enum<T> & INamedType> {
      */
     public void syncShopData(ServerPlayer player, T type, int index) {
         ShopSlot shopSlot = this.getPlayerShopData(player.getUUID()).getShopSlotsByType(type).get(index);
-        FPSMatch.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new ShopDataSlotS2CPacket(name, type, shopSlot));
+        FPSMatch.sendToPlayer(player, new ShopDataSlotS2CPacket(name, type, shopSlot));
     }
 
     public void sync() {
@@ -559,7 +557,7 @@ public class FPSMShop<T extends Enum<T> & INamedType> {
             money = this.startMoney;
         }
         FPSMShopEvent.DataInit<T> event = new FPSMShopEvent.DataInit<>(this, uuid, getShopDataByRaw(), money);
-        MinecraftForge.EVENT_BUS.post(event);
+        NeoForge.EVENT_BUS.post(event);
         ShopData<T> data = new ShopData<>(event.getData(), this.typeCount, money);
         this.playersData.put(uuid, data);
         return data;

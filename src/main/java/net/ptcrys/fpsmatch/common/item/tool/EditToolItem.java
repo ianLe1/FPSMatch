@@ -1,5 +1,7 @@
 package net.ptcrys.fpsmatch.common.item.tool;
 
+import net.minecraft.world.item.Item;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.ptcrys.fpsmatch.FPSMatch;
 import net.ptcrys.fpsmatch.common.item.tool.handler.ClickAction;
 import net.ptcrys.fpsmatch.common.item.tool.handler.ClickActionContext;
@@ -18,10 +20,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
+import net.ptcrys.fpsmatch.util.ItemNbt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,7 +33,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-@Mod.EventBusSubscriber(modid = FPSMatch.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = FPSMatch.MODID, bus = EventBusSubscriber.Bus.GAME)
 public abstract class EditToolItem extends FPSMToolItem {
 
     public static final String TYPE_TAG = "SelectedType";
@@ -101,7 +104,7 @@ public abstract class EditToolItem extends FPSMToolItem {
     }
 
     public EditMode getCurrentEditMode(ItemStack stack) {
-        CompoundTag tag = stack.getOrCreateTag();
+        CompoundTag tag = ItemNbt.getOrCreateTag(stack);
         if (!tag.contains(EDIT_MODE_TAG)) {
             setEditMode(stack, EditMode.TYPE);
             return EditMode.TYPE;
@@ -143,7 +146,7 @@ public abstract class EditToolItem extends FPSMToolItem {
                               int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
 
-        if (!stack.getOrCreateTag().contains(EDIT_MODE_TAG)) {
+        if (!ItemNbt.getOrCreateTag(stack).contains(EDIT_MODE_TAG)) {
             this.setEditMode(stack, EditMode.TYPE);
         }
     }
@@ -298,9 +301,9 @@ public abstract class EditToolItem extends FPSMToolItem {
     }
 
     @Override
-    public void appendHoverText(@NotNull ItemStack pStack, @Nullable Level pLevel,
+    public void appendHoverText(@NotNull ItemStack pStack, Item.TooltipContext pContext,
                                 @NotNull List<Component> pTooltipComponents, @NotNull TooltipFlag pIsAdvanced) {
-        super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
+        super.appendHoverText(pStack, pContext, pTooltipComponents, pIsAdvanced);
         EditToolItem editTool = (EditToolItem) pStack.getItem();
 
         EditMode currentMode = editTool.getCurrentEditMode(pStack);

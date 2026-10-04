@@ -1,6 +1,6 @@
 package net.ptcrys.fpsmatch.core.persistence;
 
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLLoader;
 
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;

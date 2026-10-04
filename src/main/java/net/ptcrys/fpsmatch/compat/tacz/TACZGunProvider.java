@@ -4,8 +4,8 @@ import net.ptcrys.fpsmatch.compat.gun.*;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.item.IGun;
@@ -28,7 +28,7 @@ public class TACZGunProvider implements IGunProvider {
 
     @Override
     public boolean isAvailable() {
-        return net.minecraftforge.fml.ModList.get().isLoaded(MOD_ID);
+        return net.neoforged.fml.ModList.get().isLoaded(MOD_ID);
     }
 
     // ========== 枪械识别 ==========

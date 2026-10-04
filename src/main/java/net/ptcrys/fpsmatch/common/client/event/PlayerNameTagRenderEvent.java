@@ -2,9 +2,10 @@ package net.ptcrys.fpsmatch.common.client.event;
 
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.neoforged.bus.api.ICancellableEvent;
 
 public class PlayerNameTagRenderEvent extends Event {
 
@@ -42,16 +43,12 @@ public class PlayerNameTagRenderEvent extends Event {
         return partialTick;
     }
 
-    public static class Pre extends PlayerNameTagRenderEvent {
+    public static class Pre extends PlayerNameTagRenderEvent implements ICancellableEvent {
 
         public Pre(Player player, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, float partialTick) {
             super(player, poseStack, bufferSource, packedLight, partialTick);
         }
 
-        @Override
-        public boolean isCancelable() {
-            return true;
-        }
     }
 
     public static class Post extends PlayerNameTagRenderEvent {
@@ -60,9 +57,5 @@ public class PlayerNameTagRenderEvent extends Event {
             super(player, poseStack, bufferSource, packedLight, partialTick);
         }
 
-        @Override
-        public boolean isCancelable() {
-            return false;
-        }
     }
 }

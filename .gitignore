@@ -137,3 +137,8 @@ wiki-publish/
 
 # Local porting and decompilation workspace
 /porting/
+
+# 1.21.1 移植：第三方 mod jar 不入库（版权）
+libs/
+run/
+*.log

@@ -4,7 +4,7 @@ import net.ptcrys.fpsmatch.common.client.spec.SpectateMode;
 import net.ptcrys.fpsmatch.common.packet.ClientPacketExecutor;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -18,7 +18,7 @@ public record SpectateModeS2CPacket(SpectateMode mode) {
         return new SpectateModeS2CPacket(buf.readEnum(SpectateMode.class));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctxSup) {
+    public void handle(Supplier<PayloadContext> ctxSup) {
         ClientPacketExecutor.execute(ctxSup, this);
     }
 }

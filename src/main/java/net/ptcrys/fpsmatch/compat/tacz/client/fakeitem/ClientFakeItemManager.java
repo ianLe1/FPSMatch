@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.ptcrys.fpsmatch.util.ItemNbt;
 
 public class ClientFakeItemManager {
 
@@ -94,8 +95,8 @@ public class ClientFakeItemManager {
 
     private static void syncMirrorStackData(ItemStack mirror, ItemStack target) {
         if (mirror.isEmpty() || target.isEmpty()) return;
-        CompoundTag tag = target.getTag();
-        mirror.setTag(tag == null ? null : tag.copy());
+        CompoundTag tag = ItemNbt.getTag(target);
+        ItemNbt.setTag(mirror, tag == null ? null : tag.copy());
         mirror.setDamageValue(target.getDamageValue());
         mirror.setCount(target.getCount());
     }

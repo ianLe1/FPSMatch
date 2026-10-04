@@ -39,6 +39,6 @@ public abstract class MixinLrtAttackKeys {
             return;
         }
         MeleeAction action = "attack_right".equals(animationName) ? MeleeAction.RIGHT : MeleeAction.LEFT;
-        SpectatorSyncNetwork.CHANNEL.sendToServer(new C2SLrtAttackPacket(action));
+        net.ptcrys.fpsmatch.FPSMatch.sendToServer(new C2SLrtAttackPacket(action));
     }
 }

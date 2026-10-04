@@ -8,7 +8,7 @@ import net.ptcrys.fpsmatch.core.data.AreaData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -44,7 +44,7 @@ public record MapRegionActionC2SPacket(
                 buf.readUtf(ID_MAX_LENGTH), buf.readVarInt(), buf.readBlockPos(), buf.readBlockPos());
     }
 
-    public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
+    public void handle(Supplier<PayloadContext> contextSupplier) {
         contextSupplier.get().enqueueWork(() -> {
             ServerPlayer player = contextSupplier.get().getSender();
             if (player == null) {

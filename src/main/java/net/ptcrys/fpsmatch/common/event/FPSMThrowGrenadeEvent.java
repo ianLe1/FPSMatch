@@ -1,12 +1,13 @@
 package net.ptcrys.fpsmatch.common.event;
 
+import net.neoforged.bus.api.ICancellableEvent;
 import net.ptcrys.fpsmatch.common.item.BaseThrowAbleItem;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
-public class FPSMThrowGrenadeEvent extends Event {
+public class FPSMThrowGrenadeEvent extends Event implements ICancellableEvent {
 
     private final LivingEntity entity;
     private final ItemStack itemStack;
@@ -18,10 +19,6 @@ public class FPSMThrowGrenadeEvent extends Event {
         this.type = type;
     }
 
-    @Override
-    public boolean isCancelable() {
-        return true;
-    }
 
     public LivingEntity getEntity() {
         return entity;

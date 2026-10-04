@@ -114,12 +114,12 @@ public class MatchConfigToolScreen extends Screen {
     @Override
     public void tick() {
         super.tick();
-        valueFields.stream().filter(Objects::nonNull).forEach(EditBox::tick);
+        // 1.21.1: EditBox 不再有 tick()
     }
 
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics);
+        renderBackground(graphics, mouseX, mouseY, partialTick);
         int left = panelLeft();
         int right = left + panelWidth();
         int bottom = height - 24;
@@ -181,7 +181,7 @@ public class MatchConfigToolScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         scrollOffset = Mth.clamp(scrollOffset - (int) scrollY, 0, maxScroll());
         return true;
     }

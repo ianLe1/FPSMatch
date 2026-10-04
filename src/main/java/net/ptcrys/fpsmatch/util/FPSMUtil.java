@@ -20,8 +20,11 @@ import net.ptcrys.fpsmatch.core.team.MapTeams;
 import net.ptcrys.fpsmatch.core.team.ServerTeam;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -37,7 +40,7 @@ import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -91,7 +94,9 @@ public class FPSMUtil {
         addThrowablePredicate((itemStack -> {
             if (FPSMImpl.findCounterStrikeGrenadesMod()) {
                 try {
-                    return itemStack.getItem() instanceof club.pisquad.minecraft.csgrenades.item.CounterStrikeGrenadeItem;
+                    // 1.21.1 移植：cs-grenade 无 1.21.1 版本，直接 instanceof 会编译失败，
+                    // 改为经由打桩的 compat 类（当前恒返回 false）。
+                    return CounterStrikeGrenadesCompat.isGrenadeItem(itemStack.getItem());
                 } catch (Exception e) {
                     return false;
                 }
@@ -546,9 +551,22 @@ public class FPSMUtil {
         return (itemStack.isEmpty() && attacker != null) ? attacker.getMainHandItem() : itemStack;
     }
 
+    /**
+     * 全局注册表查询器：优先当前服务端，否则退回内置注册表（客户端侧数据包路径不会走到这里，
+     * 因为那条路径的缓冲本身就是 {@link net.minecraft.network.RegistryFriendlyByteBuf}）。
+     */
+    public static RegistryAccess registryAccess() {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server != null) {
+            return server.registryAccess();
+        }
+        return RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
+    }
+
     public static ResourceLocation fetchSkin(UUID id, String name) {
         return Minecraft.getInstance().getSkinManager()
-                .getInsecureSkinLocation(new GameProfile(id, name));
+                .getInsecureSkin(new GameProfile(id, name))
+                .texture();
     }
 
     /**

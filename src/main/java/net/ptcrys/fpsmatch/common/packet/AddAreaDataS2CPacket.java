@@ -1,10 +1,11 @@
 package net.ptcrys.fpsmatch.common.packet;
 
+import net.minecraft.network.chat.ComponentSerialization;
 import net.ptcrys.fpsmatch.core.data.AreaData;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -16,7 +17,7 @@ public record AddAreaDataS2CPacket(String key, Component name, int color, AreaDa
 
     public static void encode(AddAreaDataS2CPacket packet, FriendlyByteBuf buf) {
         buf.writeUtf(packet.key());
-        buf.writeComponent(packet.name());
+        ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC.encode(buf, packet.name());
         buf.writeInt(packet.color());
         buf.writeJsonWithCodec(AreaData.CODEC, packet.areaData());
     }
@@ -24,12 +25,12 @@ public record AddAreaDataS2CPacket(String key, Component name, int color, AreaDa
     public static AddAreaDataS2CPacket decode(FriendlyByteBuf buf) {
         return new AddAreaDataS2CPacket(
                 buf.readUtf(),
-                buf.readComponent(),
+                ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC.decode(buf),
                 buf.readInt(),
                 buf.readJsonWithCodec(AreaData.CODEC));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ClientPacketExecutor.execute(ctx, this);
     }
 }

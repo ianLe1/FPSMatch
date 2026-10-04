@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.common.capability.team;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.ptcrys.fpsmatch.common.command.FPSMCommand;
 import net.ptcrys.fpsmatch.common.command.FPSMCommandSuggests;
 import net.ptcrys.fpsmatch.common.command.FPSMHelpManager;
@@ -33,10 +34,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -55,7 +56,13 @@ import java.util.UUID;
  * 商店能力：为队伍提供商店系统支持
  * 使用注册的商店类型系统，无需泛型
  */
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
+// NeoForge 1.21.1 规则 4：@EventBusSubscriber 走的是 AutomaticEventSubscriber 的**静态注入**路径，
+// 因此该类的每个 @SubscribeEvent 方法都必须是 static；本类有 2 个实例方法订阅（onJoin/onLeave，
+// 依赖 this 的每实例状态），实机即抛：
+//   IllegalArgumentException: Method ...ShopCapability.onJoin(FPSMTeamEvent$JoinEvent)
+//   annotated with @SubscribeEvent is not static
+// 实例订阅本来就由 CapabilityMap#register 里的 NeoForge.EVENT_BUS.register(capability) 逐实例完成，
+// 所以类级注解是多余的；两个 static 订阅已迁到同包的 ShopCapabilityEvents。
 public class ShopCapability extends TeamCapability implements FPSMCapability.Savable<FPSMShop<?>>, FPSMCapability.DataSynchronizable {
 
     public static Optional<FPSMShop<?>> getShopByPlayer(ServerPlayer player) {
@@ -141,7 +148,7 @@ public class ShopCapability extends TeamCapability implements FPSMCapability.Sav
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    // 订阅入口在 ShopCapabilityEvents（本类不能带 @EventBusSubscriber，见类注释）
     public static void onPlayerPickupItem(FPSMapEvent.PlayerEvent.PickupItemEvent event) {
         ServerPlayer player = event.getPlayer();
         ShopCapability.getShopByPlayer(player).ifPresent(shop -> {
@@ -157,7 +164,7 @@ public class ShopCapability extends TeamCapability implements FPSMCapability.Sav
         FPSMUtil.sortPlayerInventory(player);
     }
 
-    @SubscribeEvent(priority = EventPriority.LOW)
+    // 订阅入口在 ShopCapabilityEvents（本类不能带 @EventBusSubscriber，见类注释）
     public static void onPlayerDropItem(ItemTossEvent event) {
         if (event.getEntity().level().isClientSide) return;
         ItemStack itemStack = event.getEntity().getItem();

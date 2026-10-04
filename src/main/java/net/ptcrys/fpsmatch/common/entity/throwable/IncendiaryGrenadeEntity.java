@@ -47,9 +47,9 @@ public class IncendiaryGrenadeEntity extends BaseProjectileLifeTimeEntity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(ITEM, new ItemStack(Items.BARRIER));
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ITEM, new ItemStack(Items.BARRIER));
     }
 
     private void applyFireEffect() {
@@ -63,7 +63,7 @@ public class IncendiaryGrenadeEntity extends BaseProjectileLifeTimeEntity {
     }
 
     private void applyPlayerDamage(LivingEntity entity) {
-        entity.setSecondsOnFire(1);
+        entity.igniteForSeconds(1);
         if (entity instanceof ServerPlayer player && !player.gameMode.isSurvival()) {
             return;
         }

@@ -50,10 +50,10 @@ public class SmokeShellEntity extends BaseProjectileLifeTimeEntity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(PARTICLE_OPTIONS, new DustParticleOptions(new Vector3f(1, 1, 1), 10F));
-        entityData.define(Particle_COOLDOWN, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(PARTICLE_OPTIONS, new DustParticleOptions(new Vector3f(1, 1, 1), 10F));
+        builder.define(Particle_COOLDOWN, 0);
     }
 
     @Override

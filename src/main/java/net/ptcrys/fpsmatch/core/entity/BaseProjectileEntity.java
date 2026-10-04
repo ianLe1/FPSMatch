@@ -84,9 +84,9 @@ public abstract class BaseProjectileEntity extends ThrowableItemProjectile {
     }
 
     @Override
-    protected void defineSynchedData() {
-        entityData.define(STATE, 0);
-        entityData.define(ACTIVATED, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(STATE, 0);
+        builder.define(ACTIVATED, false);
     }
 
     @Override

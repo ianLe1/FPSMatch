@@ -5,7 +5,7 @@ import net.ptcrys.fpsmatch.core.shop.ShopAction;
 import net.ptcrys.fpsmatch.core.shop.ShopActionResult;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -42,7 +42,7 @@ public record ShopActionResultS2CPacket(
                 new ShopActionResult(buffer.readEnum(ShopActionResult.Code.class)));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> context) {
+    public void handle(Supplier<PayloadContext> context) {
         ClientPacketExecutor.execute(context, this);
     }
 }

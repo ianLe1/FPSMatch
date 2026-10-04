@@ -1,6 +1,5 @@
 package net.ptcrys.fpsmatch;
 
-import net.ptcrys.fpsmatch.bukkit.FPSMBukkit;
 import net.ptcrys.fpsmatch.common.capability.FPSMCapabilityRegister;
 import net.ptcrys.fpsmatch.common.client.net.FPSMClientNetwork;
 import net.ptcrys.fpsmatch.common.client.net.FPSMClientPacketRegistrar;
@@ -31,21 +30,19 @@ import net.ptcrys.fpsmatch.config.FPSMConfig;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.event.lifecycle.InterModEnqueueEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,21 +71,14 @@ public class FPSMatch {
     public static final Logger LOGGER = LoggerFactory.getLogger("FPSMatch");
     private static final String PROTOCOL_VERSION = "1.5.0";
     private static final NetworkPacketRegister PACKET_REGISTER = new NetworkPacketRegister(ResourceLocation.tryBuild("fpsmatch", "main"), PROTOCOL_VERSION);
-    public static final SimpleChannel INSTANCE = PACKET_REGISTER.getChannel();
     public static final String DEBUG_SYS_PROP = "fpsm.debug";
     private static volatile boolean DEBUG_ENABLED = Boolean.parseBoolean(System.getProperty(DEBUG_SYS_PROP, "false"));
 
-    @SuppressWarnings("removal")
-    public FPSMatch() {
-        this(FMLJavaModLoadingContext.get());
-    }
-
-    public FPSMatch(FMLJavaModLoadingContext context) {
-        IEventBus modEventBus = context.getModEventBus();
+    public FPSMatch(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::onRegisterPackets);
         modEventBus.addListener(this::onEnqueue);
-        MinecraftForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(this);
         FPSMItemRegister.ITEMS.register(modEventBus);
         FPSMItemRegister.TABS.register(modEventBus);
         FPSMSoundRegister.SOUNDS.register(modEventBus);
@@ -96,19 +86,23 @@ public class FPSMatch {
         FPSMEffectRegister.MOB_EFFECTS.register(modEventBus);
         FPSMatchRule.init();
         FPSMCapabilityRegister.register();
-        context.registerConfig(ModConfig.Type.CLIENT, FPSMConfig.clientSpec);
-        context.registerConfig(ModConfig.Type.COMMON, FPSMConfig.commonSpec);
-        context.registerConfig(ModConfig.Type.SERVER, FPSMConfig.initServer());
-        if (FPSMBukkit.isBukkitEnvironment()) {
-            FPSMBukkit.register();
-        }
+        modContainer.registerConfig(ModConfig.Type.CLIENT, FPSMConfig.clientSpec);
+        modContainer.registerConfig(ModConfig.Type.COMMON, FPSMConfig.commonSpec);
+        modContainer.registerConfig(ModConfig.Type.SERVER, FPSMConfig.initServer());
     }
 
-    @SubscribeEvent
+    // 注意：不能标 @SubscribeEvent。本类通过 NeoForge.EVENT_BUS.register(this) 注册到 game 总线，
+    // 而 NeoForge 1.21.1 的 IEventBus#register(Object) 会逐个校验 @SubscribeEvent 方法的参数类型
+    // 必须属于该总线；InterModEnqueueEvent 是 mod 总线事件（IModBusEvent），会导致
+    // IllegalArgumentException: ... has @SubscribeEvent annotation, but takes an argument that is
+    // not valid for this bus，服务端直接 Failed to start。该方法已由构造器的
+    // modEventBus.addListener(this::onEnqueue) 登记，删掉注解行为完全等价。
     public void onEnqueue(final InterModEnqueueEvent event) {
         event.enqueueWork(() -> {
             if (FPSMImpl.findClothConfig()) {
-                DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> FPSMenuIntegration::registerModsPage);
+                if (FMLEnvironment.dist == Dist.CLIENT) {
+                    FPSMenuIntegration.registerModsPage();
+                }
             } else {
                 if (FMLEnvironment.dist == Dist.CLIENT) {
                     try {
@@ -162,7 +156,10 @@ public class FPSMatch {
      * 请在 {@link FPSMClientPacketRegistrar#registerAll()} 中
      * 添加 packet 到客户端处理器的注册映射，而不是把客户端逻辑直接写回 packet 类。
      */
-    private void onRegisterPackets(final FMLCommonSetupEvent event) {
+    private void onRegisterPackets(final RegisterPayloadHandlersEvent event) {
+        // NeoForge 1.21：网络包注册迁移到 RegisterPayloadHandlersEvent（模组总线）。
+        // 注册器由事件提供，必须在注册任何包之前绑定。
+        PACKET_REGISTER.bind(event.registrar(PROTOCOL_VERSION));
         PACKET_REGISTER.registerPacket(ShopDataSlotS2CPacket.class);
         PACKET_REGISTER.registerPacket(ShopActionC2SPacket.class);
         PACKET_REGISTER.registerPacket(ShopMoneyS2CPacket.class);
@@ -223,7 +220,14 @@ public class FPSMatch {
         PACKET_REGISTER.registerPacket(ShopEditorResultS2CPacket.class);
         PACKET_REGISTER.registerPacket(ListenerModuleActionC2SPacket.class);
         PACKET_REGISTER.registerPacket(ListenerModuleResultS2CPacket.class);
-        event.enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> FPSMClientPacketRegistrar::registerAll));
+        // 观众同步包原本走独立的第二条 SimpleChannel；NeoForge 1.21 取消 SimpleChannel 后并入主注册器。
+        PACKET_REGISTER.registerPacket(net.ptcrys.fpsmatch.compat.spectate.net.SpectatorInspectPackets.C2SStartInspectPacket.class);
+        PACKET_REGISTER.registerPacket(net.ptcrys.fpsmatch.compat.spectate.net.SpectatorInspectPackets.S2CWatchedPlayerInspectPacket.class);
+        PACKET_REGISTER.registerPacket(net.ptcrys.fpsmatch.compat.spectate.net.SpectatorLrtAttackPackets.C2SLrtAttackPacket.class);
+        PACKET_REGISTER.registerPacket(net.ptcrys.fpsmatch.compat.spectate.net.SpectatorLrtAttackPackets.S2CWatchedPlayerLrtAttackPacket.class);
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            FPSMClientPacketRegistrar.registerAll();
+        }
     }
 
     public static <M> void sendTo(Player player, M message) {
@@ -235,14 +239,14 @@ public class FPSMatch {
     }
 
     public static <M> void sendToPlayer(ServerPlayer player, M message) {
-        NetworkPacketRegister.getChannelFromCache(message.getClass()).send(PacketDistributor.PLAYER.with(() -> player), message);
+        NetworkPacketRegister.sendToPlayer(player, message);
     }
 
     public static <M> void sendToServer(M message) {
         if (FMLEnvironment.dist != Dist.CLIENT || !FPSMClientNetwork.canSendToServer()) {
             return;
         }
-        NetworkPacketRegister.getChannelFromCache(message.getClass()).sendToServer(message);
+        NetworkPacketRegister.sendToServer(message);
     }
 
     @SubscribeEvent

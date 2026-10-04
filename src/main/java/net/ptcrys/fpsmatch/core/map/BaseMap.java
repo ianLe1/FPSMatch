@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.core.map;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.ptcrys.fpsmatch.FPSMatch;
 import net.ptcrys.fpsmatch.common.capability.team.ShopCapability;
 import net.ptcrys.fpsmatch.common.capability.team.SpawnPointCapability;
@@ -36,8 +37,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.fml.common.Mod;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -56,7 +57,8 @@ import java.util.function.Predicate;
 /**
  * BaseMap 抽象类，表示游戏中的基础地图。
  */
-@Mod.EventBusSubscriber(modid = FPSMatch.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+// 1.21.1 NeoForge 要求 @EventBusSubscriber 类自身必须有 @SubscribeEvent 方法（见 SmokeShellRenderer 注释）。
+// BaseMap 及其子类都不订阅任何事件，注解是历史残留，去掉。
 public abstract class BaseMap {
 
     // 地图名称
@@ -367,7 +369,7 @@ public abstract class BaseMap {
      * 开始游戏
      */
     public boolean start() {
-        boolean cancelled = MinecraftForge.EVENT_BUS.post(new FPSMapEvent.StartEvent(this));
+        boolean cancelled = NeoForge.EVENT_BUS.post(new FPSMapEvent.StartEvent(this)).isCanceled();
         if (!cancelled) {
             resetMatchClock();
             this.clearReadyPlayers();
@@ -434,7 +436,7 @@ public abstract class BaseMap {
      * 胜利操作
      */
     public void victory() {
-        MinecraftForge.EVENT_BUS.post(new FPSMapEvent.VictoryEvent(this));
+        NeoForge.EVENT_BUS.post(new FPSMapEvent.VictoryEvent(this));
     }
 
     ;
@@ -450,7 +452,7 @@ public abstract class BaseMap {
      * 清理地图
      */
     public boolean cleanupMap() {
-        return !MinecraftForge.EVENT_BUS.post(new FPSMapEvent.ClearEvent(this));
+        return !NeoForge.EVENT_BUS.post(new FPSMapEvent.ClearEvent(this)).isCanceled();
     }
 
     /**
@@ -458,7 +460,7 @@ public abstract class BaseMap {
      */
     public void reset() {
         resetMatchClock();
-        MinecraftForge.EVENT_BUS.post(new FPSMapEvent.ResetEvent(this));
+        NeoForge.EVENT_BUS.post(new FPSMapEvent.ResetEvent(this));
         this.clearReadyPlayers();
     }
 
@@ -495,7 +497,7 @@ public abstract class BaseMap {
     }
 
     public void leave(ServerPlayer player) {
-        if (MinecraftForge.EVENT_BUS.post(new FPSMapEvent.PlayerEvent.LeaveEvent(this, player))) return;
+        if (NeoForge.EVENT_BUS.post(new FPSMapEvent.PlayerEvent.LeaveEvent(this, player)).isCanceled()) return;
         this.sendPacketToJoinedPlayer(player, new FPSMatchStatsResetS2CPacket(), true);
         player.setGameMode(GameType.ADVENTURE);
         this.lobby.setReady(player.getUUID(), false);
@@ -539,7 +541,7 @@ public abstract class BaseMap {
             return MapTeams.JoinTeamResult.of(MapTeams.JoinTeamResult.Status.MID_MATCH_JOIN_DISABLED);
         }
 
-        if (MinecraftForge.EVENT_BUS.post(new FPSMapEvent.PlayerEvent.JoinEvent(this, player))) {
+        if (NeoForge.EVENT_BUS.post(new FPSMapEvent.PlayerEvent.JoinEvent(this, player)).isCanceled()) {
             return MapTeams.JoinTeamResult.of(MapTeams.JoinTeamResult.Status.CANCELLED);
         }
 
@@ -682,7 +684,7 @@ public abstract class BaseMap {
      *
      */
     public boolean reload() {
-        boolean flag = !MinecraftForge.EVENT_BUS.post(new FPSMapEvent.ReloadEvent(this));
+        boolean flag = !NeoForge.EVENT_BUS.post(new FPSMapEvent.ReloadEvent(this)).isCanceled();
         if (flag) {
             loadConfig();
         }
@@ -692,7 +694,7 @@ public abstract class BaseMap {
     public final void load() {
         if (FPSMCore.getInstance().isRegistered(this)) return;
 
-        MinecraftForge.EVENT_BUS.post(new FPSMapEvent.LoadEvent(this));
+        NeoForge.EVENT_BUS.post(new FPSMapEvent.LoadEvent(this));
         FPSMCore.getInstance().registerMap(this.getGameType(), this);
     }
 

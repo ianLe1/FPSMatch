@@ -7,7 +7,7 @@ import net.ptcrys.fpsmatch.core.map.BaseMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -70,7 +70,7 @@ public record OpenMapCreatorToolScreenS2CPacket(
                 readNullableBlockPos(buf));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ClientPacketExecutor.execute(ctx, this);
     }
 

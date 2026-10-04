@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.common.packet.shop;
 
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.ptcrys.fpsmatch.common.packet.ClientPacketExecutor;
 import net.ptcrys.fpsmatch.core.shop.INamedType;
 import net.ptcrys.fpsmatch.core.shop.UnknownShopType;
@@ -7,7 +8,7 @@ import net.ptcrys.fpsmatch.core.shop.slot.ShopSlot;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -53,7 +54,7 @@ public class ShopDataSlotS2CPacket {
         buf.writeUtf(packet.shopName, 128);
         buf.writeUtf(packet.type.name(), 128);
         buf.writeInt(packet.index);
-        buf.writeItemStack(packet.itemStack, false);
+        ItemStack.STREAM_CODEC.encode((RegistryFriendlyByteBuf) buf, packet.itemStack);
         buf.writeInt(packet.cost);
         buf.writeInt(packet.boughtCount);
         buf.writeBoolean(packet.locked);
@@ -64,13 +65,13 @@ public class ShopDataSlotS2CPacket {
                 buf.readUtf(128),
                 new UnknownShopType(buf.readUtf(128)),
                 buf.readInt(),
-                buf.readItem(),
+                ItemStack.STREAM_CODEC.decode((RegistryFriendlyByteBuf) buf),
                 buf.readInt(),
                 buf.readInt(),
                 buf.readBoolean());
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ClientPacketExecutor.execute(ctx, this);
     }
 }

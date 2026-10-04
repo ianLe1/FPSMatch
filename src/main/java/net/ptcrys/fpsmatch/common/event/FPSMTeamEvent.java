@@ -1,9 +1,10 @@
 package net.ptcrys.fpsmatch.common.event;
 
+import net.neoforged.bus.api.ICancellableEvent;
 import net.ptcrys.fpsmatch.core.team.BaseTeam;
 
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 public class FPSMTeamEvent extends Event {
 
@@ -17,7 +18,7 @@ public class FPSMTeamEvent extends Event {
         return team;
     }
 
-    public static class JoinEvent extends FPSMTeamEvent {
+    public static class JoinEvent extends FPSMTeamEvent implements ICancellableEvent {
 
         private final Player player;
 
@@ -31,7 +32,7 @@ public class FPSMTeamEvent extends Event {
         }
     }
 
-    public static class LeaveEvent extends FPSMTeamEvent {
+    public static class LeaveEvent extends FPSMTeamEvent implements ICancellableEvent {
 
         private final Player player;
 

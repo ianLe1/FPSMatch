@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.common.item.tool;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.ptcrys.fpsmatch.FPSMatch;
 import net.ptcrys.fpsmatch.common.item.tool.handler.ClickAction;
 import net.ptcrys.fpsmatch.common.item.tool.handler.ClickActionContext;
@@ -18,16 +19,21 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
+import net.ptcrys.fpsmatch.util.ItemNbt;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
 
-@Mod.EventBusSubscriber(modid = FPSMatch.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+// NeoForge 1.21.1 规则：被注册为监听器的类，其**父类**不允许带 @SubscribeEvent 方法
+// （EventBus.checkSupertypes：Attempting to register a listener object of type ... however its
+//  supertype ... has a @SubscribeEvent method. This is not allowed!）。
+// EditToolItem 继承本类且自身要当监听器，所以本类不能带注解/订阅方法；
+// 静态订阅方法已迁到同包的 ToolItemEvents。
 public abstract class FPSMToolItem extends Item implements EditToolClickHandler {
 
     public static final String TYPE_TAG = "SelectedType";
@@ -68,27 +74,27 @@ public abstract class FPSMToolItem extends Item implements EditToolClickHandler 
 
     // 标签操作方法
     public void setTag(ItemStack stack, String tagName, String value) {
-        CompoundTag tag = stack.getOrCreateTag();
+        CompoundTag tag = ItemNbt.getOrCreateTag(stack);
         tag.putString(tagName, value);
     }
 
     public String getTag(ItemStack stack, String tagName) {
-        CompoundTag tag = stack.getOrCreateTag();
+        CompoundTag tag = ItemNbt.getOrCreateTag(stack);
         return tag.contains(tagName) ? tag.getString(tagName) : "";
     }
 
     public int getIntTag(ItemStack stack, String tagName) {
-        CompoundTag tag = stack.getOrCreateTag();
+        CompoundTag tag = ItemNbt.getOrCreateTag(stack);
         return tag.contains(tagName) ? tag.getInt(tagName) : 0;
     }
 
     public void setIntTag(ItemStack stack, String tagName, int value) {
-        CompoundTag tag = stack.getOrCreateTag();
+        CompoundTag tag = ItemNbt.getOrCreateTag(stack);
         tag.putInt(tagName, value);
     }
 
     public void removeTag(ItemStack stack, String tagName) {
-        CompoundTag tag = stack.getOrCreateTag();
+        CompoundTag tag = ItemNbt.getOrCreateTag(stack);
         tag.remove(tagName);
     }
 
@@ -119,10 +125,10 @@ public abstract class FPSMToolItem extends Item implements EditToolClickHandler 
         if (level.isClientSide) return;
 
         // 初始化标签
-        if (!stack.getOrCreateTag().contains(DOUBLE_CLICK_COUNT_TAG)) {
+        if (!ItemNbt.getOrCreateTag(stack).contains(DOUBLE_CLICK_COUNT_TAG)) {
             this.setIntTag(stack, DOUBLE_CLICK_COUNT_TAG, 0);
         }
-        if (!stack.getOrCreateTag().contains(DOUBLE_CLICK_LAST_TICK_TAG)) {
+        if (!ItemNbt.getOrCreateTag(stack).contains(DOUBLE_CLICK_LAST_TICK_TAG)) {
             this.setIntTag(stack, DOUBLE_CLICK_LAST_TICK_TAG, 0);
         }
 
@@ -141,7 +147,7 @@ public abstract class FPSMToolItem extends Item implements EditToolClickHandler 
         }
     }
 
-    @SubscribeEvent
+    // 订阅入口在 ToolItemEvents#onLeftClickEmpty（本类不能是监听器父类，见类注释）
     public static void onLeftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
         Player player = event.getEntity();
         Level level = player.level();

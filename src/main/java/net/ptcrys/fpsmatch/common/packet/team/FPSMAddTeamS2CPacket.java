@@ -5,7 +5,7 @@ import net.ptcrys.fpsmatch.core.team.ServerTeam;
 import net.ptcrys.fpsmatch.core.team.TeamData;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -30,7 +30,7 @@ public record FPSMAddTeamS2CPacket(String gameType, String mapName, int color, T
                 packetBuffer.readJsonWithCodec(TeamData.CODEC));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> supplier) {
+    public void handle(Supplier<PayloadContext> supplier) {
         ClientPacketExecutor.execute(supplier, this);
     }
 }

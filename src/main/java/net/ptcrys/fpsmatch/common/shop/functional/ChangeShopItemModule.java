@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.common.shop.functional;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.ptcrys.fpsmatch.FPSMatch;
 import net.ptcrys.fpsmatch.common.event.register.RegisterFPSMSaveDataEvent;
 import net.ptcrys.fpsmatch.compat.gun.GunCompatManager;
@@ -12,8 +13,8 @@ import net.ptcrys.fpsmatch.core.shop.slot.ShopSlot;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -24,7 +25,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
  * 该模块用于在商店槽位变更事件中动态修改槽位的物品和价格。
  * 支持在购买时替换物品和价格，并在退回时恢复默认设置。
  */
-@Mod.EventBusSubscriber(modid = FPSMatch.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = FPSMatch.MODID, bus = EventBusSubscriber.Bus.GAME)
 public record ChangeShopItemModule(ItemStack defaultItem, int defaultCost, ItemStack changedItem, int changedCost, String moduleName) implements ListenerModule {
 
     public ChangeShopItemModule(ItemStack defaultItem, int defaultCost, ItemStack changedItem, int changedCost) {

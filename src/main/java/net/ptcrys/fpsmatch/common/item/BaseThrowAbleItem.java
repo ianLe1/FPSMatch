@@ -19,7 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -107,9 +107,9 @@ public class BaseThrowAbleItem extends Item implements IThrowEntityAble {
 
     public void handleThrow(Level level, LivingEntity entity, ItemStack stack, ThrowType type) {
         if (level.isClientSide) {
-            if (MinecraftForge.EVENT_BUS.post(new FPSMThrowGrenadeEvent(entity, stack, type))) return;
+            if (NeoForge.EVENT_BUS.post(new FPSMThrowGrenadeEvent(entity, stack, type)).isCanceled()) return;
 
-            FPSMatch.INSTANCE.sendToServer(new ThrowEntityC2SPacket(type));
+            FPSMatch.sendToServer(new ThrowEntityC2SPacket(type));
             this.isLeftPressed = false;
             this.isRightPressed = false;
             this.tickCount = 0;

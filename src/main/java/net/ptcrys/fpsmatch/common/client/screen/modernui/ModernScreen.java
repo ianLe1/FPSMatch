@@ -125,7 +125,7 @@ public abstract class ModernScreen extends Screen implements MuiScreen {
     @Override
     public void render(GuiGraphics graphics, int x, int y, float partial) {
         syncViewport();
-        renderBackground(graphics);
+        renderBackground(graphics, x, y, partial);
         graphics.flush();
         UIManager.getInstance().render(graphics, x, y, partial);
         double scale = Minecraft.getInstance().getWindow().getGuiScale();
@@ -186,7 +186,7 @@ public abstract class ModernScreen extends Screen implements MuiScreen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics) {
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         graphics.fill(0, 0, width, height, 0xEE141618);
     }
 
@@ -251,7 +251,7 @@ public abstract class ModernScreen extends Screen implements MuiScreen {
     }
 
     @Override
-    public boolean mouseScrolled(double x, double y, double delta) {
+    public boolean mouseScrolled(double x, double y, double scrollX, double delta) {
         return true;
     }
 

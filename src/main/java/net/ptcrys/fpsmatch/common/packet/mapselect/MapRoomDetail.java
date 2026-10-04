@@ -34,7 +34,7 @@ public record MapRoomDetail(
         buf.writeCollection(detail.availableInviteTargets(), (buffer, info) -> MapRoomPlayerInfo.encode(info, buffer));
         buf.writeCollection(detail.editableShops(), (buffer, info) -> info.encode(buffer));
         buf.writeCollection(detail.teams(), (buffer, info) -> MapRoomTeamInfo.encode(info, buffer));
-        buf.writeCollection(detail.readyPlayers(), FriendlyByteBuf::writeUUID);
+        buf.writeCollection(detail.readyPlayers(), (buffer, uuid) -> buffer.writeUUID(uuid));
         writeArea(buf, detail.mapArea());
         buf.writeCollection(detail.bombAreas(), MapRoomDetail::writeArea);
         buf.writeBoolean(detail.demolitionRegionsSupported());
@@ -50,7 +50,7 @@ public record MapRoomDetail(
         List<MapRoomPlayerInfo> availableInviteTargets = buf.readCollection(ArrayList::new, MapRoomPlayerInfo::decode);
         List<EditableShopInfo> editableShops = buf.readCollection(ArrayList::new, EditableShopInfo::decode);
         List<MapRoomTeamInfo> teams = buf.readCollection(ArrayList::new, MapRoomTeamInfo::decode);
-        Set<UUID> readyPlayers = buf.readCollection(HashSet::new, FriendlyByteBuf::readUUID);
+        Set<UUID> readyPlayers = buf.readCollection(HashSet::new, buffer -> buffer.readUUID());
         AreaData mapArea = readArea(buf);
         List<AreaData> bombAreas = buf.readCollection(ArrayList::new, MapRoomDetail::readArea);
         return new MapRoomDetail(summary, players, settings, availableInviteTargets, editableShops,

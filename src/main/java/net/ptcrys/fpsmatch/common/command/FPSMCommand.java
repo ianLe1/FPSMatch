@@ -16,8 +16,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -51,7 +51,7 @@ public class FPSMCommand {
         LiteralArgumentBuilder<CommandSourceStack> literal = init(builder);
 
         RegisterFPSMCommandEvent registerFPSMCommandEvent = new RegisterFPSMCommandEvent(literal, context, FPSMHelpManager.getInstance());
-        MinecraftForge.EVENT_BUS.post(registerFPSMCommandEvent);
+        NeoForge.EVENT_BUS.post(registerFPSMCommandEvent);
         FPSMHelpManager.getInstance().bind(dispatcher.register(registerFPSMCommandEvent.getTree()));
     }
 

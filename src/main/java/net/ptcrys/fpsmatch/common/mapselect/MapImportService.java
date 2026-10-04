@@ -14,7 +14,7 @@ import net.ptcrys.fpsmatch.util.FPSMCodec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLLoader;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -131,7 +131,7 @@ public final class MapImportService {
     private static Object decodeSetting(Setting<?> setting, JsonElement value) {
         com.mojang.serialization.DataResult result = ((com.mojang.serialization.Codec) setting.codec())
                 .decode(JsonOps.INSTANCE, value);
-        com.mojang.datafixers.util.Pair pair = (com.mojang.datafixers.util.Pair) result.getOrThrow(false, error -> error.toString());
+        com.mojang.datafixers.util.Pair pair = (com.mojang.datafixers.util.Pair) result.getOrThrow();
         return pair.getFirst();
     }
 
@@ -179,7 +179,7 @@ public final class MapImportService {
 
     private static List<ItemStack> decodeKits(JsonElement json) {
         return ItemStack.CODEC.listOf().decode(JsonOps.INSTANCE, json)
-                .getOrThrow(false, IllegalArgumentException::new).getFirst()
+                .getOrThrow(IllegalArgumentException::new).getFirst()
                 .stream().map(ItemStack::copy).toList();
     }
 

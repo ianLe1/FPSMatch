@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -69,7 +69,7 @@ public class FPSMBaseCommand {
     }
 
     private static int handleReLoad(CommandContext<CommandSourceStack> context) {
-        MinecraftForge.EVENT_BUS.post(new FPSMReloadEvent(FPSMCore.getInstance()));
+        NeoForge.EVENT_BUS.post(new FPSMReloadEvent(FPSMCore.getInstance()));
         sendSuccess(context.getSource(), Component.translatable("commands.fpsm.reload.success"));
         return 1;
     }

@@ -79,14 +79,14 @@ public interface ISavePort<T> {
 
         return codec()
                 .decode(JsonOps.INSTANCE, DataFixer.getInstance().fixJson(getHolderClass(), rawData, oldVersion, getVersion()))
-                .getOrThrow(false, e -> {
+                .getOrThrow(e -> {
                     throw new DataPersistenceException("Failed to decode fixed data", e);
                 }).getFirst();
     }
 
     default T decode(JsonElement jsonElement) {
         return codec().decode(JsonOps.INSTANCE, jsonElement)
-                .getOrThrow(false, e -> {
+                .getOrThrow(e -> {
                     throw new DataPersistenceException("Failed to decode fixed data", e);
                 })
                 .getFirst();
@@ -103,7 +103,7 @@ public interface ISavePort<T> {
     default JsonElement encodeToJson(T data) {
         JsonObject wrapper = new JsonObject();
         wrapper.addProperty("version", getVersion());
-        wrapper.add("data", codec().encodeStart(JsonOps.INSTANCE, data).getOrThrow(false, throwable -> {
+        wrapper.add("data", codec().encodeStart(JsonOps.INSTANCE, data).getOrThrow(throwable -> {
             throw new DataPersistenceException("Failed to encode data to JSON", throwable);
         }));
         return wrapper;

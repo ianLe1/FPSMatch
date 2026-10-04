@@ -2,7 +2,7 @@ package net.ptcrys.fpsmatch.core.persistence;
 
 import net.ptcrys.fpsmatch.FPSMatch;
 
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLLoader;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

@@ -1,27 +1,28 @@
 package net.ptcrys.fpsmatch.common.packet.team;
 
+import net.minecraft.network.chat.ComponentSerialization;
 import net.ptcrys.fpsmatch.core.FPSMCore;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
 public record TeamChatMessageC2SPacket(Component message) {
 
     public static void encode(TeamChatMessageC2SPacket packet, FriendlyByteBuf packetBuffer) {
-        packetBuffer.writeComponent(packet.message);
+        ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC.encode(packetBuffer, packet.message);
     }
 
     public static TeamChatMessageC2SPacket decode(FriendlyByteBuf packetBuffer) {
         return new TeamChatMessageC2SPacket(
-                packetBuffer.readComponent());
+                ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC.decode(packetBuffer));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> supplier) {
-        NetworkEvent.Context context = supplier.get();
+    public void handle(Supplier<PayloadContext> supplier) {
+        PayloadContext context = supplier.get();
         context.enqueueWork(() -> {
             ServerPlayer player = context.getSender();
             FPSMCore.getInstance().getMapByPlayer(player)

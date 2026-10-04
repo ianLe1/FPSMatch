@@ -29,7 +29,7 @@ public class AreaData {
     public AreaData(@Nonnull BlockPos pos1, @Nonnull BlockPos pos2) {
         this.pos1 = pos1;
         this.pos2 = pos2;
-        this.aabb = new AABB(pos1, pos2);
+        this.aabb = AABB.encapsulatingFullBlocks(pos1, pos2);
     }
 
     public BlockPos pos1() {

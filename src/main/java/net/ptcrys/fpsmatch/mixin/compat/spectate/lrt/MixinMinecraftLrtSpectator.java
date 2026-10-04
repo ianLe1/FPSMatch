@@ -39,7 +39,7 @@ public class MixinMinecraftLrtSpectator {
         if (stack.isEmpty()) {
             return;
         }
-        BlockEntityWithoutLevelRenderer renderer = net.minecraftforge.client.extensions.common.IClientItemExtensions.of(stack).getCustomRenderer();
+        BlockEntityWithoutLevelRenderer renderer = net.neoforged.neoforge.client.extensions.common.IClientItemExtensions.of(stack).getCustomRenderer();
         if (renderer instanceof MeleeItemRenderer meleeRenderer) {
             LuaAnimationStateMachine<?> asm = meleeRenderer.getStateMachine(stack);
             if (asm != null) {

@@ -3,7 +3,7 @@ package net.ptcrys.fpsmatch.common.packet.team;
 import net.ptcrys.fpsmatch.common.packet.ClientPacketExecutor;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -19,7 +19,7 @@ public record TeamPlayerLeaveS2CPacket(UUID player) {
                 packetBuffer.readUUID());
     }
 
-    public void handle(Supplier<NetworkEvent.Context> supplier) {
+    public void handle(Supplier<PayloadContext> supplier) {
         ClientPacketExecutor.execute(supplier, this);
     }
 }

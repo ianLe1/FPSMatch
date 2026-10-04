@@ -1,7 +1,7 @@
 package net.ptcrys.fpsmatch.common.packet;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -15,7 +15,7 @@ public record RemoveDebugDataByPrefixS2CPacket(String prefix) {
         return new RemoveDebugDataByPrefixS2CPacket(buf.readUtf());
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ClientPacketExecutor.execute(ctx, this);
     }
 }

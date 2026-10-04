@@ -3,13 +3,13 @@ package net.ptcrys.fpsmatch.compat.kubejs.events;
 import net.ptcrys.fpsmatch.common.event.FPSMTeamEvent;
 import net.ptcrys.fpsmatch.common.event.FPSMapEvent;
 
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 
 import dev.latvian.mods.kubejs.event.EventHandler;
-import dev.latvian.mods.kubejs.event.EventJS;
+import dev.latvian.mods.kubejs.event.KubeEvent;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import dev.latvian.mods.kubejs.script.ScriptTypePredicate;
 
@@ -46,7 +46,7 @@ public class FPSMatchCommonEvents {
                                                                  Class<? extends FPSMatchKubeJSEvents.FPSMatchEventJS<E>> jsClass,
                                                                  Class<E> forgeClass,
                                                                  Function<E, ? extends FPSMatchKubeJSEvents.FPSMatchEventJS<E>> factory) {
-        Supplier<Class<? extends EventJS>> supplier = () -> jsClass;
+        Supplier<Class<? extends KubeEvent>> supplier = () -> jsClass;
         EventHandler handler = FPSMatchKubeJSEvents.GROUP.add(name, ScriptTypePredicate.STARTUP_OR_SERVER, supplier);
 
         eventHandlers.put(forgeClass, event -> {
@@ -111,7 +111,7 @@ public class FPSMatchCommonEvents {
                 FPSMatchKubeJSEvents.TeamLeaveEventJS.class, FPSMTeamEvent.LeaveEvent.class,
                 FPSMatchKubeJSEvents.TeamLeaveEventJS::new);
 
-        MinecraftForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(this);
     }
 
     @SubscribeEvent

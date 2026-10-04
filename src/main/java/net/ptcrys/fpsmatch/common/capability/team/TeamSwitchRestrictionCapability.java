@@ -1,19 +1,20 @@
 package net.ptcrys.fpsmatch.common.capability.team;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.ptcrys.fpsmatch.common.event.FPSMapEvent;
 import net.ptcrys.fpsmatch.core.capability.FPSMCapabilityManager;
 import net.ptcrys.fpsmatch.core.capability.team.TeamCapability;
 import net.ptcrys.fpsmatch.core.team.BaseTeam;
 
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.GAME)
 public class TeamSwitchRestrictionCapability extends TeamCapability {
 
     private final List<UUID> unableToSwitchPlayers = new ArrayList<>();

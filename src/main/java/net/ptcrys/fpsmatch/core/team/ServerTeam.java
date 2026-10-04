@@ -13,7 +13,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.PlayerTeam;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -194,7 +193,7 @@ public final class ServerTeam extends BaseTeam {
 
     public void syncCapabilities(ServerPlayer player) {
         for (TeamCapabilitiesS2CPacket packet : TeamCapabilitiesS2CPacket.toList(this, this.getCapabilityMap().getSynchronizableCapabilityClasses(false))) {
-            FPSMatch.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
+            FPSMatch.sendToPlayer(player, packet);
         }
     }
 
@@ -205,7 +204,7 @@ public final class ServerTeam extends BaseTeam {
 
         for (TeamCapabilitiesS2CPacket packet : TeamCapabilitiesS2CPacket.toList(this, caps)) {
             for (ServerPlayer player : players) {
-                FPSMatch.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
+                FPSMatch.sendToPlayer(player, packet);
             }
         }
         for (Class<T> cap : caps) getCapabilityMap().get(cap).ifPresent(FPSMCapability.CapabilitySynchronizable::onBroadcast);

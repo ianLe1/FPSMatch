@@ -2,7 +2,7 @@ package net.ptcrys.fpsmatch.mixin.compat.spectate.tacz;
 
 import net.ptcrys.fpsmatch.compat.spectate.tacz.SpectatorCameraRecoil;
 
-import net.minecraftforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
 
 import com.tacz.guns.api.event.common.GunFireEvent;
 import com.tacz.guns.client.event.CameraSetupEvent;

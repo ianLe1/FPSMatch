@@ -8,7 +8,7 @@ import net.ptcrys.fpsmatch.core.team.MapTeams;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -28,7 +28,7 @@ public record TeamManageActionC2SPacket(String mapName, UUID targetPlayer, Strin
         return new TeamManageActionC2SPacket(buf.readUtf(), buf.readUUID(), buf.readUtf());
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer sender = ctx.get().getSender();
             if (sender == null) return;

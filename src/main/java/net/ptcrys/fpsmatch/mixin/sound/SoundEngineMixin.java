@@ -31,7 +31,7 @@ public class SoundEngineMixin {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
 
-        if (player != null && player.hasEffect(FPSMEffectRegister.FLASH_BLINDNESS.get())) {
+        if (player != null && player.hasEffect(FPSMEffectRegister.FLASH_BLINDNESS)) {
             if (!fPSMatch$isAllowedSound(sound)) {
                 ci.cancel();
             }
@@ -46,7 +46,7 @@ public class SoundEngineMixin {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
 
-        if (player != null && player.hasEffect(FPSMEffectRegister.FLASH_BLINDNESS.get())) {
+        if (player != null && player.hasEffect(FPSMEffectRegister.FLASH_BLINDNESS)) {
             if (fPSMatch$isAllowedSound(sound)) {
                 ci.cancel();
             }
@@ -61,7 +61,7 @@ public class SoundEngineMixin {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
 
-        if (player != null && player.hasEffect(FPSMEffectRegister.FLASH_BLINDNESS.get())) {
+        if (player != null && player.hasEffect(FPSMEffectRegister.FLASH_BLINDNESS)) {
             if (!fPSMatch$isAllowedSound(sound)) {
                 cir.setReturnValue(false);
             }
@@ -76,7 +76,7 @@ public class SoundEngineMixin {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
 
-        if (player != null && player.hasEffect(FPSMEffectRegister.FLASH_BLINDNESS.get())) {
+        if (player != null && player.hasEffect(FPSMEffectRegister.FLASH_BLINDNESS)) {
             fPSMatch$stopNonAllowedSounds();
             ci.cancel();
         }

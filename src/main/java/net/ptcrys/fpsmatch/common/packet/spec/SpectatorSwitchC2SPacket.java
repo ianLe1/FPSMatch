@@ -5,8 +5,8 @@ import net.ptcrys.fpsmatch.common.client.spec.SpectatorSwitchInputEvent;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -20,11 +20,11 @@ public record SpectatorSwitchC2SPacket(SpectatorSwitchDirection direction) {
         return new SpectatorSwitchC2SPacket(b.readEnum(SpectatorSwitchDirection.class));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> s) {
-        NetworkEvent.Context c = s.get();
+    public void handle(Supplier<PayloadContext> s) {
+        PayloadContext c = s.get();
         c.enqueueWork(() -> {
             ServerPlayer p = c.getSender();
-            if (p != null && p.isSpectator()) MinecraftForge.EVENT_BUS.post(new SpectatorSwitchInputEvent(p, direction));
+            if (p != null && p.isSpectator()) NeoForge.EVENT_BUS.post(new SpectatorSwitchInputEvent(p, direction));
         });
         c.setPacketHandled(true);
     }

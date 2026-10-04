@@ -1,5 +1,6 @@
 package net.ptcrys.fpsmatch.common.entity;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.ptcrys.fpsmatch.FPSMatch;
 import net.ptcrys.fpsmatch.common.capability.team.ShopCapability;
 import net.ptcrys.fpsmatch.common.drop.DropType;
@@ -33,10 +34,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import com.mojang.datafixers.util.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +46,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-@Mod.EventBusSubscriber(modid = FPSMatch.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = FPSMatch.MODID, bus = EventBusSubscriber.Bus.GAME)
 public class MatchDropEntity extends Entity {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -96,9 +97,9 @@ public class MatchDropEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(DATA_TYPE, 3);
-        this.entityData.define(DATA_ITEM, ItemStack.EMPTY);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(DATA_TYPE, 3);
+        builder.define(DATA_ITEM, ItemStack.EMPTY);
     }
 
     @Override
@@ -123,7 +124,7 @@ public class MatchDropEntity extends Entity {
             this.zo = this.getZ();
             Vec3 vec3 = this.getDeltaMovement();
             float f = this.getEyeHeight() - 0.11111111F;
-            net.minecraftforge.fluids.FluidType fluidType = this.getMaxHeightFluidType();
+            net.neoforged.neoforge.fluids.FluidType fluidType = this.getMaxHeightFluidType();
             if (!fluidType.isAir() && !fluidType.isVanilla() && this.getFluidTypeHeight(fluidType) > (double) f) {
                 this.setDeltaMovement(vec3.x * (double) 0.99F, vec3.y + (double) (vec3.y < (double) 0.06F ? 5.0E-4F : 0.0F), vec3.z * (double) 0.99F);
             } else
@@ -198,7 +199,7 @@ public class MatchDropEntity extends Entity {
         }
     }
 
-    protected @NotNull BlockPos getBlockPosBelowThatAffectsMyMovement() {
+    public @NotNull BlockPos getBlockPosBelowThatAffectsMyMovement() {
         return this.getOnPos(0.999999F);
     }
 

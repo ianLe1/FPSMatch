@@ -1,7 +1,7 @@
 package net.ptcrys.fpsmatch.common.client.camera;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 /** A scene's overlay surface when its camera policy hides the normal HUD. */
 public final class CameraOverlayEvent extends Event {

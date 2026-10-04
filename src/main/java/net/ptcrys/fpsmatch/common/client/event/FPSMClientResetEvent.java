@@ -1,6 +1,6 @@
 package net.ptcrys.fpsmatch.common.client.event;
 
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 public class FPSMClientResetEvent extends Event {
 

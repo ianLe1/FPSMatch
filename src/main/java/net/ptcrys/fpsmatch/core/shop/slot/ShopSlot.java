@@ -16,7 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -397,7 +397,7 @@ public class ShopSlot {
             FPSMUtil.playerDropMatchItem(player, itemStack);
         }
 
-        MinecraftForge.EVENT_BUS.post(new PlayerObtainItemEvent(player, obtainedItem));
+        NeoForge.EVENT_BUS.post(new PlayerObtainItemEvent(player, obtainedItem));
         boughtCount++;
 
         return money == -1 ? money : money - cost;

@@ -1,22 +1,22 @@
 package net.ptcrys.fpsmatch.common.client.screen.hud;
 
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 
 public interface IHudRenderer {
 
-    void onRenderGuiOverlayPre(RenderGuiOverlayEvent.Pre event);
+    void onRenderGuiLayerPre(RenderGuiLayerEvent.Pre event);
 
-    void onSpectatorRender(ForgeGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight);
+    void onSpectatorRender(GuiGraphics guiGraphics, DeltaTracker deltaTracker);
 
-    void onPlayerRender(ForgeGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight);
+    void onPlayerRender(GuiGraphics guiGraphics, DeltaTracker deltaTracker);
 
-    default void render(ForgeGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight, boolean isSpectator) {
+    default void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker, boolean isSpectator) {
         if (isSpectator) {
-            onSpectatorRender(gui, guiGraphics, partialTick, screenWidth, screenHeight);
+            onSpectatorRender(guiGraphics, deltaTracker);
         } else {
-            onPlayerRender(gui, guiGraphics, partialTick, screenWidth, screenHeight);
+            onPlayerRender(guiGraphics, deltaTracker);
         }
     }
 }

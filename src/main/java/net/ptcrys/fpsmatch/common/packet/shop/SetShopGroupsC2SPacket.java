@@ -4,7 +4,7 @@ import net.ptcrys.fpsmatch.common.shop.editor.ShopEditorService;
 import net.ptcrys.fpsmatch.common.shop.editor.ShopEditorSnapshot;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -32,7 +32,7 @@ public record SetShopGroupsC2SPacket(long requestId, ShopEditorSnapshot.Target t
                 buf.readInt(), buf.readVarIntArray(ShopEditorSnapshot.MAX_SLOTS));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ctx.get().enqueueWork(() -> ShopEditorService.setGroups(ctx.get().getSender(), requestId, target, revision, groupId, indices));
         ctx.get().setPacketHandled(true);
     }

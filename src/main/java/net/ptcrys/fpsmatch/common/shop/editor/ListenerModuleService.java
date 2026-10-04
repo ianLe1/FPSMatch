@@ -16,7 +16,9 @@ import net.ptcrys.fpsmatch.core.shop.functional.ListenerModule;
 import net.ptcrys.fpsmatch.core.shop.slot.ShopSlot;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.FriendlyByteBuf;
+import net.ptcrys.fpsmatch.util.ItemNbt;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -52,14 +54,15 @@ public final class ListenerModuleService {
     }
 
     public static void writeDefinition(FriendlyByteBuf buf, ListenerModule module) {
+        HolderLookup.Provider registries = ShopEditorService.registries(buf);
         buf.writeUtf(module.getName(), 256);
         buf.writeInt(module.getPriority());
         buf.writeUtf(module.getClass().getName());
         buf.writeBoolean(module instanceof ChangeShopItemModule);
         if (module instanceof ChangeShopItemModule change) {
-            ShopEditorService.writeTag(buf, change.defaultItem().save(new CompoundTag()));
+            ShopEditorService.writeTag(buf, ItemNbt.save(registries, change.defaultItem()));
             buf.writeInt(change.defaultCost());
-            ShopEditorService.writeTag(buf, change.changedItem().save(new CompoundTag()));
+            ShopEditorService.writeTag(buf, ItemNbt.save(registries, change.changedItem()));
             buf.writeInt(change.changedCost());
         }
     }

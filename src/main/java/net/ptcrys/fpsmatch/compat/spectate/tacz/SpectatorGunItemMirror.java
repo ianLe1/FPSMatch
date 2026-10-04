@@ -6,6 +6,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import com.tacz.guns.api.item.IGun;
+import net.ptcrys.fpsmatch.util.ItemNbt;
 
 /**
  * Mirrors the spectated player's main-hand item into the local inventory slot
@@ -96,8 +97,8 @@ public final class SpectatorGunItemMirror {
         if (mirror == null || target == null) {
             return;
         }
-        CompoundTag tag = target.getTag();
-        mirror.setTag(tag == null ? null : tag.copy());
+        CompoundTag tag = ItemNbt.getTag(target);
+        ItemNbt.setTag(mirror, tag == null ? null : tag.copy());
         mirror.setCount(target.getCount());
         mirror.setDamageValue(target.getDamageValue());
     }

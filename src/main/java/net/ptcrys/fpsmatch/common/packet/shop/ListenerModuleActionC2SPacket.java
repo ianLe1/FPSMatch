@@ -5,7 +5,7 @@ import net.ptcrys.fpsmatch.common.shop.editor.ListenerModuleSnapshot.Definition;
 import net.ptcrys.fpsmatch.common.shop.editor.ShopEditorSnapshot;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.ptcrys.fpsmatch.common.packet.register.PayloadContext;
 
 import java.util.function.Supplier;
 
@@ -30,7 +30,7 @@ public record ListenerModuleActionC2SPacket(long requestId, ShopEditorSnapshot.T
         return new ListenerModuleActionC2SPacket(buf.readLong(), ShopEditorSnapshot.Target.read(buf), buf.readEnum(Action.class), buf.readUtf(64), Definition.read(buf));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public void handle(Supplier<PayloadContext> ctx) {
         ctx.get().enqueueWork(() -> ListenerModuleService.execute(ctx.get().getSender(), this));
         ctx.get().setPacketHandled(true);
     }

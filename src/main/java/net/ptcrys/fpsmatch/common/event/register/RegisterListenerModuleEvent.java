@@ -3,7 +3,7 @@ package net.ptcrys.fpsmatch.common.event.register;
 import net.ptcrys.fpsmatch.core.shop.functional.LMManager;
 import net.ptcrys.fpsmatch.core.shop.functional.ListenerModule;
 
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 public class RegisterListenerModuleEvent extends Event {
 
