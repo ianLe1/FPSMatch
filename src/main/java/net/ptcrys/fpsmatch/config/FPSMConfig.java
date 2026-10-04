@@ -84,6 +84,13 @@ public class FPSMConfig {
         public final ModConfigSpec.DoubleValue baseArmorPenetration;
         public final ModConfigSpec.DoubleValue headshotMultiplier;
 
+        // 第三方模组兼容层：WarBorn Renewed 弹道防护
+        public final ModConfigSpec.BooleanValue warbornEnabled;
+        public final ModConfigSpec.DoubleValue warbornBulletMassKg;
+        public final ModConfigSpec.DoubleValue warbornFallbackSpeedMps;
+        public final ModConfigSpec.BooleanValue warbornDamageArmorDurability;
+        public final ModConfigSpec.IntValue warbornArmorDurabilityLossPerHit;
+
         // drops
         public final ModConfigSpec.IntValue mainWeaponCount;
         public final ModConfigSpec.IntValue secondaryWeaponCount;
@@ -178,6 +185,41 @@ public class FPSMConfig {
                         "烟雾弹激活后的存活时间 (tick)",
                         "Survival time after smoke bomb activation (ticks)",
                         "20 ticks = 1 second").defineInRange("SmokeShellLivingTime", 300, 0, 900);
+            }
+            builder.pop();
+
+            builder.comment(
+                    "第三方模组兼容层设置",
+                    "Third-party mod compatibility settings").push("compat");
+            {
+                builder.comment(
+                        "WarBorn Renewed 弹道防护兼容",
+                        "WarBorn Renewed ballistic protection bridge",
+                        "原 mod 定义了 bulletResistance / protectionClass 属性却没有任何消费者（死代码），",
+                        "本兼容层在 FPSMatch 的枪械伤害事件里读取它们，按 ½mv² 估算动能决定是否穿透。").push("warborn");
+                {
+                    warbornEnabled = builder.comment(
+                            "是否启用 WarBorn Renewed 弹道防护兼容",
+                            "Enable the WarBorn Renewed ballistic protection bridge").define("enabled", true);
+
+                    warbornBulletMassKg = builder.comment(
+                            "弹头质量估算值 (kg)：TaCZ 不提供弹头质量，动能按 ½mv² 估算，默认 0.008（约 9mm 弹头）。",
+                            "不同枪包可按需调整：质量越大，估算动能越高，越容易超过防护等级阈值。",
+                            "Estimated bullet mass in kg. TaCZ exposes no mass data; default 0.008 ≈ 9mm. Tune per gun pack.").defineInRange("bulletMassKg", 0.008D, 0.0001D, 1.0D);
+
+                    warbornFallbackSpeedMps = builder.comment(
+                            "拿不到子弹实体或子弹速度≈0 时使用的回退速度 (m/s)，默认 400。",
+                            "Fallback muzzle speed in m/s when the bullet entity is missing or its velocity is ~0.").defineInRange("fallbackSpeedMps", 400.0D, 1.0D, 5000.0D);
+
+                    warbornDamageArmorDurability = builder.comment(
+                            "未被穿透时是否额外磨损 WarBorn 护甲耐久",
+                            "Whether to wear down WarBorn armor durability when the shot is NOT penetrated.").define("damageArmorDurability", true);
+
+                    warbornArmorDurabilityLossPerHit = builder.comment(
+                            "每次未被穿透的命中磨损的护甲耐久点数（爆头只磨损头盔，躯干只磨损胸甲）",
+                            "Armor durability points lost per non-penetrating hit (headshot wears the helmet only, body wears the chestplate only).").defineInRange("armorDurabilityLossPerHit", 1, 0, 100);
+                }
+                builder.pop();
             }
             builder.pop();
         }

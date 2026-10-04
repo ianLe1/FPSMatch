@@ -54,7 +54,14 @@ public class GunDamageHandler {
         }
     }
 
-    private static boolean isSameTeamGunDamage(FPSMGunDamageEvent event, ServerPlayer hurtEntity) {
+    /**
+     * 同类（队友）枪械命中判定。
+     * <p>
+     * 可见性由 private 放宽为 public：Warborn 兼容层（{@code compat/warborn}）复用同一判据，
+     * 避免出现第二套「队友免伤」语义。行为本身未做任何改动。
+     * </p>
+     */
+    public static boolean isSameTeamGunDamage(FPSMGunDamageEvent event, ServerPlayer hurtEntity) {
         if (!(event.getAttacker() instanceof ServerPlayer attacker)) {
             return false;
         }
